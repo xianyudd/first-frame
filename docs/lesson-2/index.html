@@ -150,6 +150,7 @@ details>summary .hint{font-size:12px; color:var(--ink-soft); font-weight:400}
     <li><a href="#t4" data-lv="4"><span class="dot" data-todo="2-4" data-lv="4">4</span>④速度按种类查表</a></li>
     <li><a href="#t5" data-lv="5"><span class="dot" data-todo="2-5" data-lv="5">5</span>⑤敌人换各自贴图</a></li>
     <li><a href="#t6" data-lv="6"><span class="dot" data-todo="2-6" data-lv="6">6</span>⑥命中扣血+按种给分</a></li>
+    <li><a href="#challenge">★ 挑战：BFS 绕墙追人</a></li>
     <li><a href="#stuck"><span class="dot">?</span>卡住了看这里</a></li>
     <li><a href="#finish"><span class="dot star">★</span>通关验收</a></li>
   </ul></nav>
@@ -429,6 +430,41 @@ if (enemies[j].hp &lt;= 0) {                        <span class="d">// 血空了
 make run       <span class="d"># 手动：打重甲要好几下，杀精英分数跳得多</span></pre>
 
   <div class="check"><span class="todo-dot" data-todo="2-6" aria-label="TODO 6：未连接">?</span><span><span class="todo-result" data-todo-label="2-6">未连接</span><br>通关条件：<code>[6]</code> 组全绿 + 试玩重甲要连打 → <span class="badge">提交：git commit</span></span></div>
+</section>
+<section id="challenge">
+  <h2><span class="lvnum star">★</span>挑战项目：会绕墙追人的怪（BFS 最短路）🧠</h2>
+  <p class="lead">前面 6 步是必做地板。这一关<b>没有标准答案、也不自动评分</b>——它把你在算法里学的 BFS 搬进游戏：让怪不再直线撞墙，而是<b>绕开墙、走最短路</b>抓你。<code>make run</code> 跑起来能看见怪绕过障碍，就算成功。</p>
+
+  <h3>🎯 你要做出什么</h3>
+  <p>在场地上放几堵墙，让某一种怪（建议先拿 <code>EnemyKind::Elite</code>）用 <b>BFS 单源最短路</b>朝玩家逼近：一格一格绕过墙，而不是穿墙或卡在墙上。</p>
+
+  <h3>📖 概念：网格 + BFS 单源最短路</h3>
+  <p>你们的地板本来就是 <code>TILE = 40</code> 的网格，正好当 BFS 的格子：整块场地是 <code>SCREEN_W/TILE × SCREEN_H/TILE = 32 × 18</code> 格。把某些格标成墙，其余能走。BFS 从<b>玩家所在格</b>出发一圈圈往外扩，天然算出每一格到玩家的最短步数——这就是「无权图最短路只能用 BFS、不能用 DFS」的原因。</p>
+
+  <h3>📋 你要做到（四步）</h3>
+  <ol>
+    <li><b>建网格</b>：一个 <code>bool wall[18][32]</code> 标出哪些格是墙（先手动摆一个 L 形试试）。</li>
+    <li><b>单源 BFS</b>：从玩家格 <code>(player.rect.x/TILE, player.rect.y/TILE)</code> 出发，用 <code>queue</code> + <code>int dist[18][32]</code>，算出每格到玩家的最短步数（墙不入队）。</li>
+    <li><b>怪查表走一步</b>：怪看自己四个邻格里 <code>dist</code> 最小的那格，朝它走——那就是最短路的下一步。</li>
+    <li><b>一次 BFS 喂全部怪</b>：一遍 BFS 覆盖全图，所有寻路怪查同一张 <code>dist</code> 表；玩家没换格就复用，或每 N 帧重算一次。</li>
+  </ol>
+
+  <h3>🧠 讲究在哪（GESP 想深一层）</h3>
+  <ul>
+    <li>为什么 <b>BFS 不是 DFS</b>：无权图里 BFS 第一次到达某格就是最短，DFS 不保证。</li>
+    <li>为什么<b>从玩家单源出发</b>而不是每只怪各跑一次：一次 BFS 是 O(格子数)=O(32×18)，几十只怪就省几十倍——这叫「共享计算」；那张 <code>dist</code> 表其实就是一张 <b>flow field</b>。</li>
+    <li>复杂度取舍：每帧全图 BFS vs 缓存复用，正是真实游戏里的性能权衡。</li>
+  </ul>
+
+  <h3>💡 火花（选做，越挑越硬）</h3>
+  <ul>
+    <li>哪些种类会寻路：给 <code>EnemyConfig</code> 加一个 <code>bool smart</code>，用配置表决定——又回到本课的「表驱动」。</li>
+    <li><b>A*</b>：把 BFS 换成 <code>priority_queue</code> 按 <code>dist + 曼哈顿距离</code> 排序，更快找到路。</li>
+    <li>让墙随关卡变化，或让玩家能放墙「骗」怪绕远。</li>
+  </ul>
+
+  <h3>🧪 怎么算成了</h3>
+  <div class="check"><span class="todo-dot" aria-hidden="true">★</span><span>这一格<b>不自动评分</b>——<code>make run</code>，把墙摆成 L 形：寻路怪会<b>绕过去</b>、普通直线怪会卡在墙上。两种一对比，你就亲眼看见 BFS 的价值了。做完给爸妈演示一下！</span></div>
 </section>
 <section id="stuck">
   <h2>🛟 卡住了看这里</h2>
