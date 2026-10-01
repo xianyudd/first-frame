@@ -8,6 +8,7 @@
 .todo-fail{border-color:var(--red)!important;background:var(--red)!important;color:var(--panel)!important}
 .todo-partial{border-color:var(--todo-partial)!important;color:var(--todo-partial)!important}
 .todo-run,.todo-waiting{border-color:var(--gold)!important;color:var(--gold)!important}
+.todo-blocked{border-style:dashed!important;border-color:var(--gold)!important;color:var(--gold)!important}
 .todo-cached{border-style:dashed!important}
 .check .todo-dot{margin-top:1px}
 .check .todo-result{font-size:13px;color:var(--ink-soft);font-weight:600}

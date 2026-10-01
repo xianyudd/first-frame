@@ -76,7 +76,7 @@ jobs:
           retention-days: 1
 
   publish:
-    if: ${{ always() && github.event_name == 'push' && (github.ref_name == 'my-lesson-1' || github.ref_name == 'my-lesson-2') }}
+    if: ${{ always() && github.event_name == 'push' && (github.ref_name == 'my-lesson-1' || github.ref_name == 'my-lesson-2' || github.ref_name == 'my-lesson-3') }}
     needs: grade
     runs-on: ubuntu-latest
     permissions:
@@ -105,29 +105,52 @@ jobs:
           from pathlib import Path
 
           lesson = int(os.environ['REF_NAME'].removeprefix('my-lesson-'))
-          ids = (1, 2, 3, 4) if lesson == 1 else (1, 2, 3, 4, 5, 6)
+          ids = tuple(range(1, {1: 4, 2: 6, 3: 9}[lesson] + 1))
+          # Only these L3 groups have prerequisites; task 10 is human review.
+          prerequisites = {4: 3, 6: 2, 7: 6} if lesson == 3 else {}
           text = Path('results/grade_output.txt').read_text(encoding='utf-8', errors='replace') if Path('results/grade_output.txt').exists() else ''
-          found = {}
-          duplicates = set()
+          found, blocked = {}, {}
+          invalid = False
           for line in text.splitlines():
-              match = re.fullmatch(r'TODO_STATUS ([1-6]) (\d+) (\d+)', line)
-              if not match:
+              if not line.lstrip().startswith(('TODO_STATUS', 'TODO_BLOCKED')):
                   continue
-              number, passed, total = map(int, match.groups())
-              if number in found:
-                  duplicates.add(number)
-              found[number] = (passed, total)
+              match = re.fullmatch(r'TODO_STATUS ([1-9]) ([0-9]{1,3}) ([0-9]{1,3})', line)
+              block = re.fullmatch(r'TODO_BLOCKED ([1-9]) ([1-9])', line)
+              if match:
+                  number, passed, total = map(int, match.groups())
+                  if number not in ids or number in found or not 0 <= passed <= total <= 100:
+                      invalid = True
+                  found[number] = (passed, total)
+              elif block:
+                  number, prior = map(int, block.groups())
+                  if number in blocked or prerequisites.get(number) != prior:
+                      invalid = True
+                  blocked[number] = prior
+              else:
+                  invalid = True
+          # A partial/malformed report must not manufacture any green statuses.
+          if set(found) != set(ids):
+              invalid = True
+          for number, value in found.items():
+              if value[1] == 0 and number not in blocked:
+                  invalid = True
+          for number, prior in blocked.items():
+              prior_value = found.get(prior)
+              if found.get(number) != (0, 0) or prior_value is None or (
+                  prior_value[1] > 0 and prior_value[0] == prior_value[1]
+              ):
+                  invalid = True
           endpoint = 'https://api.github.com/repos/{}/statuses/{}'.format(os.environ['REPOSITORY'], os.environ['COMMIT_SHA'])
           for number in ids:
-              value = found.get(number)
-              valid = number not in duplicates and value and 0 <= value[0] <= value[1] and 0 < value[1] <= 100
-              if valid:
-                  passed, total = value
+              if invalid:
+                  state, description = 'error', 'grading unavailable'
+              elif number in blocked:
+                  state, description = 'error', f'blocked by task {blocked[number]}'
+              else:
+                  passed, total = found[number]
                   state = 'success' if passed == total else 'failure'
                   kind = 'source check' if lesson == 2 and number in (1, 5) else 'checks'
                   description = f'{kind} {passed}/{total}'
-              else:
-                  state, description = 'error', 'grading unavailable'
               body = json.dumps({'state': state,
                                  'context': f'course/lesson-{lesson}/todo-{number}',
                                  'description': description,
@@ -140,4 +163,6 @@ jobs:
               with urllib.request.urlopen(request, timeout=20) as response:
                   if response.status != 201:
                       raise RuntimeError(f'Commit status failed: {response.status}')
+          if invalid:
+              raise RuntimeError('Incomplete or invalid TODO report; no passing statuses published')
           PY

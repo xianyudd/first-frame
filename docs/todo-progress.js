@@ -2,7 +2,9 @@
   "use strict";
   var REPO = "first-frame", KEY = "rogue-hb", CACHE = "rogue-todo-cache";
   var NAME = /^[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38}$/i;
-  var LABEL = {idle:"未连接", none:"尚未提交", waiting:"等待本次评测", run:"评测中", pass:"通过", partial:"部分通过", fail:"未通过", unknown:"暂无逐项结果", unavailable:"评测不可用", rate:"GitHub 查询限流", network:"读取失败", cached:"上次记录（未核实最新）"};
+  var TASK_COUNTS = {1:4, 2:6, 3:9}; // Automatic groups only; L3 task 10 is manual.
+  function taskCount(lesson) { return TASK_COUNTS[lesson] || 0; }
+  var LABEL = {blocked:"前置任务未通过（未执行）", idle:"未连接", none:"尚未提交", waiting:"等待本次评测", run:"评测中", pass:"通过", partial:"部分通过", fail:"未通过", unknown:"暂无逐项结果", unavailable:"评测不可用", rate:"GitHub 查询限流", network:"读取失败", cached:"上次记录（未核实最新）"};
   var POLL = 90000, MAX_POLL = 4, STALE = 180000;
 
   function parseStatuses(data, lesson) {
@@ -10,10 +12,14 @@
     var statuses = data && Array.isArray(data.statuses) ? data.statuses : [];
     statuses.forEach(function (s) {
       var m = typeof s.context === "string" && s.context.match(/^course\/lesson-(\d+)\/todo-(\d+)$/);
-      if (!m || Number(m[1]) !== lesson || Number(m[2]) < 1 || Number(m[2]) > (lesson === 1 ? 4 : 6)) return;
+      if (!m || Number(m[1]) !== lesson || Number(m[2]) < 1 || Number(m[2]) > taskCount(lesson)) return;
       var id = Number(m[2]);
       if (seen[id]) return; // GitHub returns the newest status for each context first.
       seen[id] = true;
+      var blocker = typeof s.description === "string" && s.description.match(/^blocked by task ([1-9])$/);
+      if (lesson === 3 && s.state === "error" && blocker && Number(blocker[1]) !== id) {
+        result[id] = "blocked"; return;
+      }
       var count = typeof s.description === "string" && s.description.match(/^(?:checks|source check) (\d+)\/(\d+)$/);
       if (s.state === "error" || !count) { result[id] = "unavailable"; return; }
       var passed = Number(count[1]), total = Number(count[2]);
@@ -54,7 +60,7 @@
     var data;
     try { data = await api(path + "/commits/" + sha + "/status?per_page=100"); }
     catch (e) { if (e.message === "missing") return {state:"unknown", sha:sha, url:url}; throw e; }
-    var items = parseStatuses(data, lesson), total = lesson === 1 ? 4 : 6;
+    var items = parseStatuses(data, lesson), total = taskCount(lesson);
     var complete = 0;
     for (var id=1; id<=total; id++) if (items[id] === "pass") complete++;
     return {state:!Object.keys(items).length ? "unknown" :
@@ -76,7 +82,7 @@
     el.setAttribute("aria-label", name);
   }
   function paintLesson(lesson, result) {
-    var total = lesson === 1 ? 4 : 6, done = 0;
+    var total = taskCount(lesson), done = 0;
     for (var id=1; id<=total; id++) {
       var state = itemState(result,id);
       if (state === "pass") done++;
@@ -93,6 +99,7 @@
     if (badge) {
       badge.className = "badge " + (result.state === "pass" ? "pass" : result.state === "run" ? "run" : result.state === "partial" ? "fail" : "idle");
       badge.textContent = result.state === "pass" ? "✓ " + done + " / " + total + " 项通过" : result.state === "partial" ? done + " / " + total + " 项通过" : LABEL[result.state];
+      if (lesson === 3) badge.textContent += " · 10 人工验收";
     }
     if (document.body.getAttribute("data-lesson") === String(lesson)) {
       var count = document.getElementById("pcount"), fill = document.getElementById("pfill"), bar = document.querySelector('[role="progressbar"]');
@@ -108,6 +115,7 @@
         result.state === "none" ? "尚无公开练习分支；提交并 push 后才会显示结果。" :
         result.state === "unknown" ? "暂无逐项结果；已有旧工作流的复刻需要更新 grade.yml。" :
         "自动检查：" + LABEL[result.state] + "。" + (lesson === 2 ? "①⑤仅检查绘制源码，实际外观请运行 make run。" : "") ;
+      if (note && lesson === 3) note.textContent += " 仅统计 01–09；BLOCKED 表示未执行，0/0 不是通过。10 请演示自己的案例并解释，画面与声音仍需实际运行检查。";
     }
     return done;
   }
@@ -124,14 +132,14 @@
     var active = 0, timer = null, last = 0, polls = MAX_POLL, currentUser = "", pending = false;
     var form=document.getElementById("tk-form"), input=document.getElementById("tk-user"), clear=document.getElementById("tk-clear"), msg=document.getElementById("tk-msg"), runs=document.getElementById("tk-runs");
     var page = Number(document.body.getAttribute("data-lesson"));
-    var lessons = page ? [page] : [1,2];
+    var lessons = page ? [page] : Object.keys(TASK_COUNTS).map(Number);
     function stop() { active++; pending=false; if (timer) clearTimeout(timer); timer=null; }
     function show(user, results) {
       lessons.forEach(function(n,i){paintLesson(n,results[i]);});
       if (msg) {
         var done = results.reduce(function(acc,r){return acc + (r.items ? Object.values(r.items).filter(function(x){return x === "pass";}).length : 0);},0);
-        // 这一页要跟踪几项：首页两课加起来 10 项，课内页只有本课的 4 / 6 项
-        var limit = lessons.reduce(function (acc,n){return acc + (n === 1 ? 4 : 6);},0);
+        // The summary counts only automatic groups, never manual acceptance.
+        var limit = lessons.reduce(function (acc,n){return acc + taskCount(n);},0);
         msg.className="tk-msg";
         msg.textContent=results.some(function(r){return r.state === "cached";}) ? "网络或 GitHub 限流：只显示上次记录，未核实最新提交。稍后刷新。" :
           results.some(function(r){return r.state === "rate";}) ? "GitHub 查询已限流，请过几分钟再刷新；当前结果未知。" :

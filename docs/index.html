@@ -181,7 +181,7 @@ git config commit.template .gitmessage                                <span clas
   <div class="tracker" id="tracker">
     <p class="tk-eyebrow">PUSH 即可见 · 自动评测</p>
     <h3 class="tk-title">我的闯关进度</h3>
-    <p class="tk-sub">输入你的 GitHub 用户名，这里会读你自己复刻里每节课的<b>自动评测</b>结果。把 <code>my-lesson-N</code> 分支 push 上去，几分钟后每项 TODO 会显示自动检查状态；第 2 课的贴图仍需亲眼检查。第一次来，先看 <a href="progress/">《进度与提交》</a>——整条循环和你要做的每一步都在那里。</p>
+    <p class="tk-sub">输入你的 GitHub 用户名，这里会读你自己复刻里每节课的<b>自动评测</b>结果。把 <code>my-lesson-N</code> 分支 push 上去，几分钟后每项 TODO 会显示自动检查状态；第 2 课的贴图仍需亲眼检查；第 3 课只统计 01–09 的自动组，10 是人工验收，BLOCKED 是前置未过而未执行，不是通过。第一次来，先看 <a href="progress/">《进度与提交》</a>——整条循环和你要做的每一步都在那里。</p>
     <form class="tk-form" id="tk-form" autocomplete="off" novalidate>
       <span class="tk-field"><span class="tk-at" aria-hidden="true">@</span>
         <label class="sr-only" for="tk-user">你的 GitHub 用户名</label>
@@ -205,11 +205,12 @@ git config commit.template .gitmessage                                <span clas
       <span class="badge ready" id="badge-2">可开始</span>
       <span class="todo-list" aria-label="第 2 课逐项检查"><span class="todo-item"><span class="todo-dot" data-todo="2-1" aria-label="第 2 课 TODO 1：未连接">?</span> 1</span><span class="todo-item"><span class="todo-dot" data-todo="2-2" aria-label="第 2 课 TODO 2：未连接">?</span> 2</span><span class="todo-item"><span class="todo-dot" data-todo="2-3" aria-label="第 2 课 TODO 3：未连接">?</span> 3</span><span class="todo-item"><span class="todo-dot" data-todo="2-4" aria-label="第 2 课 TODO 4：未连接">?</span> 4</span><span class="todo-item"><span class="todo-dot" data-todo="2-5" aria-label="第 2 课 TODO 5：未连接">?</span> 5</span><span class="todo-item"><span class="todo-dot" data-todo="2-6" aria-label="第 2 课 TODO 6：未连接">?</span> 6</span></span>
     </a>
-    <div class="lesson soon">
+    <a class="lesson" href="lesson-3/">
       <span class="lnum">3</span>
-      <div class="ltxt"><b>我的竞技场</b><p>用格子地图设计自己的关卡：铺地面、摆装饰、定玩家出生点和刷怪点。练二维数组、坐标换算。</p></div>
-      <span class="badge soon">敬请期待</span>
-    </div>
+      <div class="ltxt"><b>我的竞技场</b><p>把世界扩到窗口外，让镜头跟随、墙挡住身体、声音跟随事件。10 项任务、12 个定位标记，分阶段自己查资料、实验与解释。</p></div>
+      <span class="badge ready" id="badge-3">手册可读 · 起点发布待确认</span>
+      <span class="todo-list" aria-label="第 3 课：01–09 自动检查，10 人工验收"><span class="todo-item"><span class="todo-dot" data-todo="3-1">?</span> 01</span><span class="todo-item"><span class="todo-dot" data-todo="3-2">?</span> 02</span><span class="todo-item"><span class="todo-dot" data-todo="3-3">?</span> 03</span><span class="todo-item"><span class="todo-dot" data-todo="3-4">?</span> 04</span><span class="todo-item"><span class="todo-dot" data-todo="3-5">?</span> 05</span><span class="todo-item"><span class="todo-dot" data-todo="3-6">?</span> 06</span><span class="todo-item"><span class="todo-dot" data-todo="3-7">?</span> 07</span><span class="todo-item"><span class="todo-dot" data-todo="3-8">?</span> 08</span><span class="todo-item"><span class="todo-dot" data-todo="3-9">?</span> 09</span><span class="todo-item">10 人工验收</span></span>
+    </a>
     <div class="lesson soon">
       <span class="lnum">4</span>
       <div class="ltxt"><b>真正的障碍</b><p>让墙真的挡住人：玩家、敌人撞墙停下，子弹撞墙消失。练碰撞响应、逐轴试探。</p></div>

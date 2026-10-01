@@ -1,0 +1,145 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="description" content="第3课：大地图、镜头、碰撞与声音。十任务十二标记，以目标验收、独立实验和渐进提示学习。"><title>我的竞技场 · 闯关手册</title><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&family=Noto+Sans+SC:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap"><style>
+
+:root{
+  color-scheme:light; --ground:#F4F6FB; --panel:#FFFFFF; --panel-2:#EEF1F8;
+  --ink:#1B2436; --ink-soft:#536078; --line:#DCE2EE;
+  --accent:#2F6BFF; --accent-ink:#204FCC; --red:#B72E38; --green:#187B49; --gold:#886000;
+  --radius:16px; --disp:"ZCOOL KuaiLe",system-ui,sans-serif;
+  --body:"Noto Sans SC",system-ui,sans-serif; --mono:"JetBrains Mono",ui-monospace,monospace;
+}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  color-scheme:dark; --ground:#0E1420; --panel:#161F2E; --panel-2:#1E2A3D;
+  --ink:#E7ECF5; --ink-soft:#ADB9CE; --line:#35445E; --accent-ink:#9CBAFF;
+  --red:#FF8A8E; --green:#78DCAA; --gold:#FFD16B;
+}}
+:root[data-theme="dark"]{
+  color-scheme:dark; --ground:#0E1420; --panel:#161F2E; --panel-2:#1E2A3D;
+  --ink:#E7ECF5; --ink-soft:#ADB9CE; --line:#35445E; --accent-ink:#9CBAFF;
+  --red:#FF8A8E; --green:#78DCAA; --gold:#FFD16B;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth; scroll-padding-top:24px}
+body{margin:0; background:var(--ground); color:var(--ink); font:16px/1.85 var(--body); -webkit-font-smoothing:antialiased}
+a{color:var(--accent-ink); text-decoration:underline; text-underline-offset:4px; text-decoration-thickness:1px}
+a:hover{text-decoration-thickness:2px}
+button,input,summary,a{-webkit-tap-highlight-color:transparent}
+button{font:inherit; cursor:pointer}
+:focus-visible{outline:3px solid var(--accent-ink); outline-offset:4px; border-radius:4px}
+[hidden]{display:none!important}
+.skip-link{position:fixed; top:12px; left:12px; z-index:10; padding:10px 18px; background:var(--panel); color:var(--accent-ink); border:2px solid; border-radius:10px; transform:translateY(-160%)}
+.skip-link:focus{transform:translateY(0)}
+.sr-only{position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap}
+.themebtn,.motionbtn{min-height:44px; padding:8px 12px; border:1px solid var(--line); background:var(--panel); color:var(--ink); border-radius:10px; font-size:14px}
+.themebtn:hover,.motionbtn:hover{border-color:var(--accent-ink); background:var(--panel-2)}
+.eyebrow{color:var(--accent-ink); font:600 12px/1.5 var(--mono); letter-spacing:.12em; margin:0 0 16px}
+.hero{padding:clamp(32px,6vw,64px) 0 40px; border-bottom:1px solid var(--line)}
+.hero h1{font:400 clamp(34px,4.6vw,52px)/1.22 var(--disp); margin:0 0 18px; text-wrap:balance; letter-spacing:-.02em}
+.hero p{font-size:17px; color:var(--ink-soft); margin:0 0 22px; max-width:38em}
+.hero .eyebrow{font-size:12px; color:var(--accent-ink); margin-bottom:16px}
+.actions{display:flex; gap:12px; flex-wrap:wrap; align-items:center}
+.cta{display:inline-flex; align-items:center; justify-content:center; min-height:48px; padding:10px 20px; background:var(--accent); color:#fff; border-radius:11px; font-weight:500; text-decoration:none; transition:transform .18s ease}
+.cta:hover{background:#2458DA; text-decoration:none; transform:translateY(-2px)}
+.secondary{display:inline-flex; align-items:center; min-height:48px; padding:8px 4px}
+.preview{margin:0; min-width:0}
+#stage{display:block; width:100%; height:auto; aspect-ratio:12/5; background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); image-rendering:pixelated}
+.preview figcaption{display:flex; justify-content:space-between; gap:8px; align-items:center; padding-top:10px; font-size:13px; color:var(--ink-soft)}
+.motionbtn{font-size:13px; padding:6px 10px; flex-shrink:0}
+section{padding:40px 0; border-bottom:1px solid var(--line); scroll-margin-top:20px}
+section h2{font:400 clamp(25px,3.5vw,30px)/1.4 var(--disp); margin:0 0 12px; display:flex; align-items:center; gap:12px; text-wrap:balance}
+.lead{color:var(--ink-soft); border-left:3px solid var(--accent); padding:2px 0 2px 14px; margin:8px 0 24px; font-size:15px}
+h3{font-size:17px; line-height:1.5; margin:28px 0 12px}
+p{margin:12px 0}
+ul,ol{padding-left:24px; margin:14px 0} li{margin:8px 0}
+code{font-family:var(--mono); font-size:.88em; overflow-wrap:anywhere; background:var(--panel-2); padding:2px 5px; border-radius:5px}
+pre{background:#111B2C; color:#E7ECF5; padding:18px 20px; border:1px solid var(--line); border-radius:12px; overflow-x:auto; font:13.5px/1.8 var(--mono); margin:16px 0; tab-size:2}
+pre .d{color:#A8B7CE} pre .g{color:#7EE0A6} pre .r{color:#FF8A8E}
+.callout{padding:16px 18px; margin:18px 0; font-size:14.5px; border:1px solid var(--line); border-left:3px solid var(--accent); border-radius:0 12px 12px 0; background:var(--panel); overflow-wrap:anywhere}
+.callout .k{font-weight:700; margin-right:6px}
+.callout.warn{border-left-color:var(--red)} .warn .k{color:var(--red)}
+.storage-note{font-size:13px; color:var(--ink-soft); margin:12px 0}
+@media(max-width:540px){
+  body{font-size:15px} .hero p{font-size:16px} section{padding:32px 0}
+  pre{padding:14px; font-size:13px} .callout{padding:14px} .lead{font-size:15px}
+}
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto} *,*::before,*::after{animation:none!important; transition:none!important}
+  .cta:hover{transform:none}
+}
+
+.wrap{display:grid; grid-template-columns:250px minmax(0,1fr); max-width:1200px; margin:0 auto}
+.side{position:sticky; top:0; align-self:start; height:100vh; height:100dvh; overflow-y:auto; padding:28px 18px; border-right:1px solid var(--line); background:var(--panel)}
+.side-title{font:400 25px/1.3 var(--disp); margin:0 8px 8px}
+.side .tag{font-size:13px; color:var(--ink-soft); margin:0 8px 20px}
+.nav{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:4px}
+.nav li{margin:0}
+.nav a{display:flex; align-items:center; gap:10px; min-height:44px; padding:8px 10px; border-radius:9px; color:var(--ink); font-size:14px; text-decoration:none}
+.nav a:hover{background:var(--panel-2)}
+.nav a.active{background:var(--panel-2); color:var(--accent-ink); box-shadow:inset 3px 0 var(--accent); font-weight:500}
+.dot{width:20px; height:20px; flex:0 0 20px; border-radius:5px; border:1px solid var(--ink-soft); display:grid; place-items:center; font:12px var(--mono)}
+.dot.star{border:0; color:var(--gold); font-size:18px}
+.prog{margin:24px 8px 12px; padding-top:18px; border-top:1px solid var(--line)}
+.prog .lbl{font-size:13px; color:var(--ink-soft); display:flex; justify-content:space-between; margin-bottom:10px}
+.prog .bar{height:8px; border-radius:99px; background:var(--panel-2); overflow:hidden}
+.prog .fill{height:100%; width:100%; transform:scaleX(0); transform-origin:left; background:var(--accent); transition:transform .2s ease}
+.side .themebtn{margin:12px 8px 0; width:calc(100% - 16px)}
+.side .storage-note{margin:12px 8px; line-height:1.6}
+.main{min-width:0; padding:0 clamp(20px,4vw,56px) 100px}
+.col{max-width:720px; margin:0 auto}
+.hero .preview{max-width:400px; margin:24px 0 0}
+.lvnum{font:600 15px var(--mono); color:#fff; background:var(--accent); width:36px; height:36px; flex:0 0 36px; border-radius:10px; display:grid; place-items:center}
+.lvnum.star{background:var(--gold)}
+.meta{display:flex; flex-wrap:wrap; gap:6px 18px; font-size:13px; color:var(--ink-soft); margin:0 0 24px} .meta b{color:var(--ink); font-weight:500}
+table{width:100%; border-collapse:collapse; margin:18px 0; font-size:14px; table-layout:fixed; overflow-wrap:anywhere}
+th,td{text-align:left; padding:12px; border-bottom:1px solid var(--line); vertical-align:top} th{background:var(--panel-2); color:var(--ink); font-size:13px}
+th:first-child{width:34%}
+details{border:1px solid var(--line); border-radius:12px; margin:18px 0; background:var(--panel)}
+details>summary{cursor:pointer; list-style:none; min-height:48px; padding:14px 16px; font-weight:500; display:flex; align-items:center; gap:8px; flex-wrap:wrap; border-radius:12px}
+details>summary::-webkit-details-marker{display:none}
+details>summary:hover{background:var(--panel-2)}
+details>summary .chev{color:var(--accent-ink); transition:transform .2s; margin-left:auto}
+details[open]>summary .chev{transform:rotate(90deg)}
+details>summary .hint{font-size:12px; color:var(--ink-soft); font-weight:400}
+.dbody{padding:0 16px 14px}
+.check{display:flex; align-items:flex-start; gap:12px; margin:24px 0 4px; padding:16px; border:1px solid var(--line); border-radius:12px; background:var(--panel); font-size:15px}
+.check.eye{border-color:var(--gold)}
+.check .badge{display:inline-block; font-size:12px; padding:2px 8px; border-radius:5px; background:var(--panel-2); color:var(--ink-soft); margin-top:4px}
+.back-nav{display:none}
+@media(max-width:820px){
+  .wrap{grid-template-columns:1fr}
+  .side{position:static; height:auto; padding:22px 20px; border-right:0; border-bottom:1px solid var(--line)}
+  .side .nav{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:4px 8px}
+  .side .tag{margin-bottom:14px} .prog{margin-top:18px} .side .themebtn{width:auto; min-width:160px}
+  .main{padding-bottom:100px} .hero{padding-top:32px}
+  .back-nav{display:block; position:fixed; bottom:calc(16px + env(safe-area-inset-bottom)); right:18px; z-index:2; min-height:44px; padding:8px 16px; background:var(--panel); border:1px solid var(--line); border-radius:99px; box-shadow:0 4px 18px #0002; text-decoration:none; font-size:14px}
+}
+@media(max-width:380px){.side{padding:18px 12px} .nav a{font-size:13px; padding:8px 6px; gap:6px} th,td{padding:10px 8px}}
+
+.layout{display:grid;grid-template-columns:250px minmax(0,1fr);max-width:1200px;margin:auto}.layout>nav{position:sticky;top:0;align-self:start;max-height:100vh;overflow:auto;padding:28px 18px;background:var(--panel);border-right:1px solid var(--line)}.layout>nav>strong{font:25px/1.4 var(--disp)}.layout main{min-width:0;padding:32px clamp(20px,4vw,56px) 80px;max-width:880px}.layout header h1{font:clamp(34px,4.6vw,52px)/1.3 var(--disp)}.links a{display:flex;gap:8px;align-items:center;min-height:44px;padding:8px 10px;border-radius:9px;text-decoration:none;font-size:14px;color:var(--ink)}.links a:hover{background:var(--panel-2)}.muted,footer{color:var(--ink-soft)}dl{display:grid;grid-template-columns:6em minmax(0,1fr);gap:12px}dt{font-weight:700}dd{margin:0;min-width:0}button[data-copy]{min-height:44px;padding:6px 12px;margin:6px;border:1px solid var(--line);border-radius:10px;background:var(--panel);color:var(--ink)}details p{padding-inline:16px}.stop{padding:20px;background:var(--panel-2);border-radius:12px;margin-block:24px}.check input{margin-top:8px}.manual{color:var(--gold);white-space:nowrap;flex:0 0 auto}@media(max-width:820px){.layout{display:block}.layout>nav{position:static;max-height:none;border-right:0;border-bottom:1px solid var(--line);padding:22px 20px}.links{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px}.layout main{padding-inline:20px}dl{display:block}dd{margin-block:8px 20px}}</style><link rel="stylesheet" href="../todo-progress.css"></head><body data-lesson="3"><a class="skip-link" href="#content">跳到正文</a><div class="layout"><nav aria-label="任务导航"><strong>我的竞技场</strong><p class="tag"><a href="../">← 课程主页</a> · 第 3 课</p><p><a href="../progress/">进度与提交</a> · <a href="../git/">Git 手册</a></p><div class="links"><a href="#start">开工与定位</a><a href="#learn">怎么自己学</a><a href="#coords">世界与屏幕</a><a href="#task-01" data-lv="1"><span class="todo-dot" data-todo="3-1">?</span>01 把地图扩到窗口以外</a><a href="#task-02" data-lv="2"><span class="todo-dot" data-todo="3-2">?</span>02 把一格变成世界矩形</a><a href="#task-03" data-lv="3"><span class="todo-dot" data-todo="3-3">?</span>03 初始化镜头</a><a href="#task-04" data-lv="4"><span class="todo-dot" data-todo="3-4">?</span>04 让镜头每帧跟随</a><a href="#task-05" data-lv="5"><span class="todo-dot" data-todo="3-5">?</span>05 世界跟着镜头，文字留在屏幕</a><a href="#task-06" data-lv="6"><span class="todo-dot" data-todo="3-6">?</span>06 让整个身体检测墙</a><a href="#task-07" data-lv="7"><span class="todo-dot" data-todo="3-7">?</span>07 留在世界里，并能沿墙移动</a><a href="#task-08" data-lv="8"><span class="todo-dot" data-todo="3-8">?</span>08 子弹成功生成才响</a><a href="#task-09" data-lv="9"><span class="todo-dot" data-todo="3-9">?</span>09 实际扣血就响，包括没死</a><a href="#task-10"><span class="manual">人工</span>10 自己出一道会找出错误的题</a><a href="#debug">卡住时怎么查</a><a href="#checklist">总清单</a></div><div class="prog"><div class="lbl"><span>01–09 自动进度</span><span id="pcount" aria-live="polite">0 / 9</span></div><div class="bar" role="progressbar" aria-label="自动组通过数量，不含第10人工验收" aria-valuemin="0" aria-valuemax="9" aria-valuenow="0"><div class="fill" id="pfill"></div></div></div><button class="themebtn" id="theme" type="button">主题：跟随系统</button><p id="todo-feedback" class="todo-feedback" role="status" aria-live="polite">在首页输入 GitHub 用户名，push 后读取自动状态；10 单独人工验收。</p></nav><main id="content" tabindex="-1"><header><p class="muted">第3课 · 大地图 → 镜头 → 碰撞 → 声音</p><h1>我的竞技场</h1><p>让地图比窗口大，让镜头跟着你，再让墙挡住身体、声音跟着事件响。你已经能读C++；这一课练习自己查API、做小实验、解释结果。十项可以分几次完成，不要求两小时赶完。</p></header>
+<section id="start"><h2>开工与定位</h2><h3>先确认学生起点，再开自己的练习分支</h3><p><strong>起点发布待确认：</strong>本手册与 <code>lesson-3</code> 学生起点由老师一起发布。这里不提供尚不存在的起点下载链接。收到发布确认后，在自己的复刻目录先保存旧课修改，再运行：</p><pre>git fetch upstream
+ git branch -r --list upstream/lesson-3
+</pre><p>看到 <code>upstream/lesson-3</code> 才继续；没看到就停下，向老师询问，不要从 main 或旧课猜一个起点。</p><pre>git switch -c my-lesson-3 --no-track upstream/lesson-3
+make todo
+make run
+make test</pre><p>已有 <code>my-lesson-3</code> 则用 <code>git switch my-lesson-3</code> 返回，别重复创建。保存一项后，检查 <code>git diff</code>，只提交自己改的学生文件；首次备份用 <code>git push -u origin my-lesson-3</code>。不要合并旧课整份 main.cpp 覆盖新起点；需要时仅迁移自己已完成的配置表。复刻需启用 Actions，详见 <a href="../progress/">进度与提交</a>。</p><h3>三步找到当前任务</h3><p>十项任务共有十二个唯一定位标记：01 与 07 各有 A/B 两处；其余各一处。</p><ol><li>打开 <code>src/main.cpp</code>，读文件头任务目录；第10在 <code>src/my_cases.h</code>。</li><li>在这份课包的MSYS2 UCRT64终端运行 <code>make todo</code>，查看真实文件位置。行号会变化，别背行号。</li><li>从下面任务复制唯一 <code>TODO(L3-xx...)</code> 标记，回到指定文件按Ctrl+F。只改这项区域，先读前后代码，不复制整个函数答案。</li></ol><pre>make todo
+make run
+make test</pre><p>在自己复刻的仓库根目录、my-lesson-3 分支运行。起点能编译，但尚未完成的任务会失败。先做当前阶段；不要改tests来换绿灯。WASD移动，方向键射击，G看格线/身体框，ENTER重开，TAB切练习/战斗，Escape退出。</p><p>老师已准备资源与音频生命周期，也把镜头初始化、移动后每帧更新的调用挂好了。<strong>扩地图、镜头函数内容和绘制分层仍由你实现。</strong>音频加载/每帧更新/释放不是本课填空，别把声音加载放进循环。</p></section>
+<section id="learn"><h2>每一项都按这个顺序自己学</h2><ol><li><strong>查资料：</strong>在raylib头文件或官方cheatsheet查本项API，记下参数、返回值、坐标单位。先说出你不懂的词。</li><li><strong>最小实验：</strong>只试一个矩形、一个字段或一个调用；可先用纸画图，再在自己的临时实验文件验证。</li><li><strong>预测：</strong>运行前写下会发生什么、为什么。</li><li><strong>实现：</strong>回到标记，只处理本项目标。</li><li><strong>验证：</strong>make test看对应组，再make run亲自观察。记下预测与实际的差别。</li><li><strong>解释：</strong>不用读代码，回答本项问题；说出哪份资料支持你的做法。</li></ol><p>提示默认收起。先自己查，再按“概念 → 思路 → 局部实验”逐级打开；卡住可以请老师帮助定位，但保留你的预测和推理。</p><p>离线资料：在MSYS2安装目录的 <code>ucrt64/include/raylib.h</code> 搜索 <code>Camera2D</code>、<code>BeginMode2D</code>、<code>EndMode2D</code>、<code>CheckCollisionRecs</code>。先读这些字段与函数的注释，再用小实验核对理解。可主动打开 <a href="https://www.raylib.com/cheatsheet/cheatsheet.html" target="_blank" rel="noopener">raylib官方cheatsheet</a>查签名；学习内容可离线阅读；在线时字体与 GitHub 自动进度可能发起请求。</p></section>
+<section id="coords"><h2>世界坐标与屏幕坐标</h2><p><strong>世界：</strong>墙和角色在地图中的位置。<strong>屏幕：</strong>像素在窗口中的位置。镜头改变你看见哪一块世界，不改角色矩形和墙的世界坐标。</p><pre>地图行列 × TILE → 世界宽高
+世界中的玩家中心 → camera.target
+窗口中的屏幕中心 → camera.offset
+zoom = 1，rotation = 0</pre><p>例如世界点(1800,900)可以映射到屏幕中心(640,360)，无需把角色位置减掉1280。碰撞始终比较世界矩形。初版无平滑或边缘夹紧，靠世界边缘看到镜头外空白可以接受。当前用方向键射击，没有鼠标瞄准任务；GetScreenToWorld2D以后有鼠标输入再研究。</p></section><section id="task-01"><h2>01 · 把地图扩到窗口以外</h2><dl><dt>目标</dt><dd>窗口仍为1280×720，砖仍为40。地图横纵都大于窗口，WORLD_W/H由行列与TILE推导；把至少一块墙放在原来一屏之外。</dd><dt>可观测验收</dt><dd>重新运行后数组范围合法；完成05、07后亲自走到远端墙，看见地板与墙仍对齐。参考64列×36行对应2560×1440，你可以选其他合理尺寸。</dd><dt>修改位置</dt><dd><code>src/main.cpp</code> → <code>地图常量；InitMap</code><div><code id="marker-01-0">TODO(L3-01-A)</code><button type="button" data-copy="marker-01-0">复制标记</button></div><div><code id="marker-01-1">TODO(L3-01-B)</code><button type="button" data-copy="marker-01-1">复制标记</button></div></dd><dt>自己查</dt><dd>二维数组有效下标；常量表达式；行列与像素单位。</dd><dt>要回答</dt><dd>改窗口尺寸、缩小砖，能证明世界变大了吗？你选的远端墙坐标为什么合法？</dd></dl><details><summary>提示1 · 概念</summary><p>窗口表示你一次能看见多少，数组表示世界有多少格。有效下标到行数或列数减一。</p></details><details><summary>提示2 · 思路</summary><p>先在纸上算世界宽高与远端墙的行列，再改A；确认尺寸后才在B放墙。保留已有少量墙。</p></details><details><summary>提示3 · 局部实验</summary><p>在纸上试一个8列、40像素的地图：第7列左边是280，右边是320；第8列已不在数组内。不要直接照这个小尺寸改游戏。</p></details></section><section id="task-02"><h2>02 · 把一格变成世界矩形</h2><dl><dt>目标</dt><dd>给定row、col，返回那一格在世界中的Rectangle。</dd><dt>可观测验收</dt><dd>选择行列不同的格子，例如(3,7)，算出左上角与尺寸；make test核对02，G格线中的墙位置与计算相符。</dd><dt>修改位置</dt><dd><code>src/main.cpp</code> → <code>CellRect</code><div><code id="marker-02-0">TODO(L3-02)</code><button type="button" data-copy="marker-02-0">复制标记</button></div></dd><dt>自己查</dt><dd>Rectangle；C++列表初始化与显式类型转换。</dd><dt>要回答</dt><dd>为什么col影响x？矩形宽高的单位是什么？</dd></dl><details><summary>提示1 · 概念</summary><p>数组写行、列；世界横向是x，纵向是y。</p></details><details><summary>提示2 · 思路</summary><p>先分别算左边、上边、宽、高，不要把数组编号直接当像素。</p></details><details><summary>提示3 · 局部实验</summary><p>局部类型实验：float value = static_cast&lt;float&gt;(7 * 40); 解释为何列表初始化中需要留意int到float转换。</p></details></section><section id="task-03"><h2>03 · 初始化镜头</h2><dl><dt>目标</dt><dd>初始化Camera2D，让玩家中心映射到屏幕中心；zoom为1、rotation为0。</dd><dt>可观测验收</dt><dd>make test核对03；05完成后起始画面玩家位于中心，ENTER/TAB重开也回到正确视图。</dd><dt>修改位置</dt><dd><code>src/main.cpp</code> → <code>InitCamera</code><div><code id="marker-03-0">TODO(L3-03)</code><button type="button" data-copy="marker-03-0">复制标记</button></div></dd><dt>自己查</dt><dd>Camera2D的offset、target、rotation、zoom。</dd><dt>要回答</dt><dd>target与offset分别属于哪个坐标系？为什么目标不是玩家左上角？</dd></dl><details><summary>提示1 · 概念</summary><p>本机官方头文件说明：target是映射到offset的世界点；offset是相对窗口原点的屏幕偏移。</p></details><details><summary>提示2 · 思路</summary><p>先独立算两个中心，再决定它们各填哪个字段。不要平滑、缩放交互或边缘夹紧。</p></details><details><summary>提示3 · 局部实验</summary><p>纸上实验：世界点(1000,500)映射到屏幕点(640,360)，zoom=1、rotation=0时，其右边40像素的点应画在哪里？</p></details></section><section id="task-04"><h2>04 · 让镜头每帧跟随</h2><dl><dt>目标</dt><dd>移动后把镜头目标更新为玩家世界中心，保持第一版直接跟随。</dd><dt>可观测验收</dt><dd>make test核对04；05、07完成后往右、往下走出原一屏，玩家仍居中；重开或切模式不残留旧镜头。</dd><dt>修改位置</dt><dd><code>src/main.cpp</code> → <code>UpdateCamera</code><div><code id="marker-04-0">TODO(L3-04)</code><button type="button" data-copy="marker-04-0">复制标记</button></div></dd><dt>自己查</dt><dd>每帧更新；Rectangle中心；Camera2D.target。</dd><dt>要回答</dt><dd>只在启动时设置target，会看到什么？移动前更新和移动后更新可能有什么差别？</dd></dl><details><summary>提示1 · 概念</summary><p>角色的世界位置变，映射到的屏幕位置可以不变。</p></details><details><summary>提示2 · 思路</summary><p>观察框架调用顺序。老师已挂好初始化与移动后的每帧调用，函数里面的计算由你写。</p></details><details><summary>提示3 · 局部实验</summary><p>局部中心实验：矩形左上角(90,50)、尺寸(20,40)，先算中心，再向右移5，预测新中心。</p></details></section><section id="task-05"><h2>05 · 世界跟着镜头，文字留在屏幕</h2><dl><dt>目标</dt><dd>世界地板、墙、玩家、怪物、子弹、格线和案例框在相机内画；HUD、案例文字、结束画面在相机外画。</dd><dt>可观测验收</dt><dd>make test核对05；走远后世界一起移动，HP/Score/案例文字不漂走；G打开框与贴图仍重合；结束画面固定在窗口。</dd><dt>修改位置</dt><dd><code>src/main.cpp</code> → <code>DrawGame</code><div><code id="marker-05-0">TODO(L3-05)</code><button type="button" data-copy="marker-05-0">复制标记</button></div></dd><dt>自己查</dt><dd>BeginMode2D；EndMode2D；BeginDrawing/EndDrawing；绘制作用域。</dd><dt>要回答</dt><dd>为何相机不能只包住玩家？案例矩形和案例文字该分别放哪里？</dd></dl><details><summary>提示1 · 概念</summary><p>BeginMode2D之后的绘制使用镜头变换，直到EndMode2D；碰撞矩形无需改成屏幕坐标。</p></details><details><summary>提示2 · 思路</summary><p>先给已有绘制调用分类，再决定范围边界。格线长度用世界尺寸。不能把EndDrawing当成EndMode2D。</p></details><details><summary>提示3 · 局部实验</summary><p>纸上排序实验：世界方块、屏幕标签各一个，用两个括号标出谁在2D模式内。自行查签名后写最小实验，不要先重排整个游戏。</p></details></section><aside class="stop"><h3>停止点一 · 地图与镜头</h3><p>先停下来解释两种坐标，演示世界绘制与固定HUD。此时07未完成可能仍被旧屏幕边界挡住，记录这个待解决问题；别误判为镜头失败。走到远端的完整演示等07后补。若时间不足，下次从06开始。</p></aside><section id="task-06"><h2>06 · 让整个身体检测墙</h2><dl><dt>目标</dt><dd>只回答传入矩形是否与任一墙格重叠，不移动角色、不发声音。</dd><dt>可观测验收</dt><dd>02先完成；make test核对06；案例(280,120,40,40)完全在墙里，(250,120,40,40)身体部分重叠，都应为true。</dd><dt>修改位置</dt><dd><code>src/main.cpp</code> → <code>HitsWall</code><div><code id="marker-06-0">TODO(L3-06)</code><button type="button" data-copy="marker-06-0">复制标记</button></div></dd><dt>自己查</dt><dd>CheckCollisionRecs；双重循环；提前返回；纯判断函数。</dd><dt>要回答</dt><dd>左上角在墙外，身体能否已进墙？return false放在哪才不会漏掉后面的墙？</dd></dl><details><summary>提示1 · 概念</summary><p>比较两个世界矩形，而非两个点。</p></details><details><summary>提示2 · 思路</summary><p>只访问有效行列内的墙；对墙格拿CellRect计算矩形。所有候选检查完才判断没有墙。</p></details><details><summary>提示3 · 局部实验</summary><p>最小实验：在独立小程序比较Rectangle a={0,0,10,10}与b={9,0,10,10}，先预测再调用CheckCollisionRecs。随后只把b.x改成10，观察贴边语义。</p></details></section><section id="task-07"><h2>07 · 留在世界里，并能沿墙移动</h2><dl><dt>目标</dt><dd>A检查整个矩形在世界内；B分别尝试X、Y位移，每次合法且不撞墙才接受。</dd><dt>可观测验收</dt><dd>02、06先完成；make test核对07；四面撞墙不穿过，朝墙同时沿墙仍能走；超过旧1280/720边界可继续，世界边缘不能越出。</dd><dt>修改位置</dt><dd><code>src/main.cpp</code> → <code>InsideWorld；UpdatePlayer</code><div><code id="marker-07-0">TODO(L3-07-A)</code><button type="button" data-copy="marker-07-0">复制标记</button></div><div><code id="marker-07-1">TODO(L3-07-B)</code><button type="button" data-copy="marker-07-1">复制标记</button></div></dd><dt>自己查</dt><dd>候选矩形副本；短路逻辑；世界边界与墙碰撞的区别。</dd><dt>要回答</dt><dd>没有墙就能出世界吗？为什么第二次尝试要从已接受的X位置开始？</dd></dl><details><summary>提示1 · 概念</summary><p>世界边界关心矩形四条边，不是屏幕边界；镜头也不改变碰撞规则。</p></details><details><summary>提示2 · 思路</summary><p>画出X撞墙、Y畅通的一步。分别判断并接受；不要先移动再靠回退补救。</p></details><details><summary>提示3 · 局部实验</summary><p>局部副本实验：Rectangle candidate=player.rect; 只改candidate.x，观察player.rect是否随之改变。再解释这为何能用于试走。</p></details></section><aside class="stop"><h3>停止点二 · 碰撞与边界</h3><p>亲自跨旧屏幕边界、走到远端墙；试四面阻挡与沿墙移动。解释X/Y候选位置。先保存与记录困难，休息后再做声音；还没解释清楚时不加新功能。</p></aside><section id="task-08"><h2>08 · 子弹成功生成才响</h2><dl><dt>目标</dt><dd>仅在成功激活一颗新子弹时调用射击声，保留一次发射后的break。</dd><dt>可观测验收</dt><dd>make test核对08；正常一枪响一次，满子弹池无新子弹也无新声音；实际游戏试听。</dd><dt>修改位置</dt><dd><code>src/main.cpp</code> → <code>FireBullets</code><div><code id="marker-08-0">TODO(L3-08)</code><button type="button" data-copy="marker-08-0">复制标记</button></div></dd><dt>自己查</dt><dd>PlayShotSound；事件与按键的区别；空槽与break。</dd><dt>要回答</dt><dd>按键成功等于发射成功吗？每帧响与每次生成响有什么不同？</dd></dl><details><summary>提示1 · 概念</summary><p>声音属于发生的事件。</p></details><details><summary>提示2 · 思路</summary><p>先追踪空槽找到、子弹激活、break这段成功路径，排除无槽路径。</p></details><details><summary>提示3 · 局部实验</summary><p>纸上实验：只有两个槽且都active，按右键。逐条走过现有循环，记下生成数与声音数的预期，不需真的打满128颗。</p></details></section><section id="task-09"><h2>09 · 实际扣血就响，包括没死</h2><dl><dt>目标</dt><dd>子弹有效命中并扣血时调用命中声；死亡加分仍由原判断处理。</dd><dt>可观测验收</dt><dd>make test核对09；未命中不响；多血怪非致命命中也响，每次有效命中一次；游戏试听并观察得分时机。</dd><dt>修改位置</dt><dd><code>src/main.cpp</code> → <code>HandleHits</code><div><code id="marker-09-0">TODO(L3-09)</code><button type="button" data-copy="marker-09-0">复制标记</button></div></dd><dt>自己查</dt><dd>PlayHitSound；命中、扣血、死亡三个事件。</dd><dt>要回答</dt><dd>把声音放进hp&lt;=0分支会漏掉什么？一个子弹命中后为何要失活并break？</dd></dl><details><summary>提示1 · 概念</summary><p>受伤与死亡不是同一件事。</p></details><details><summary>提示2 · 思路</summary><p>从实际相交分支追踪子弹失活和扣血的位置，声音跟随这次有效事件。</p></details><details><summary>提示3 · 局部实验</summary><p>纸上实验：怪物初始3血，分别记录第1、2、3次有效命中后的血量、声音次数、是否加分，先预测再观察。</p></details></section><section id="task-10"><h2>10 · 自己出一道会找出错误的题</h2><dl><dt>目标</dt><dd>选一个碰墙边界案例，先写名字、矩形与expected，再启用enabled；解释依据。</dd><dt>可观测验收</dt><dd>游戏案例文字显示预期与实际；G显示世界案例框。你能算四条边并解释结果。第10由你与老师人工验收，不会出现第10组自动绿灯。</dd><dt>修改位置</dt><dd><code>src/my_cases.h</code> → <code>myCase（src/my_cases.h）</code><div><code id="marker-10-0">TODO(L3-10)</code><button type="button" data-copy="marker-10-0">复制标记</button></div></dd><dt>自己查</dt><dd>CollisionCase字段；测试输入/预期/实际；边界案例。</dd><dt>要回答</dt><dd>这道题能抓住哪类错误？若实际与预期不同，哪个有独立依据？</dd></dl><details><summary>提示1 · 概念</summary><p>预期来自几何规则，不能来自当前输出。</p></details><details><summary>提示2 · 思路</summary><p>可选刚好贴边、墙角部分重叠、跨多格的大矩形。坐标由你决定；先纸上画图。</p></details><details><summary>提示3 · 局部实验</summary><p>局部记录示例：name写测试意图，rect写你的输入，expected写预测；enabled最后打开。这里只说明字段用途，不替你报坐标与答案。</p></details></section><aside class="stop"><h3>停止点三 · 声音与自己的证据</h3><p>实际听一次正常射击、一次非致命命中，讲清自己的案例。九组自动通过仍不包含第10题解释与实际画面/试听。</p></aside><section id="debug"><h2>卡住时，带这五行来讨论</h2><pre id="debug-template">预期：我认为会……，依据是……
+实际：实际看到……（附任务号与错误消息）
+尝试：只改变了……，结果……
+最小代码：保留能复现问题的最小片段
+推断：可能是……；下一步只验证……</pre><button type="button" data-copy="debug-template">复制排错模板</button><p>每次只改一个原因。编译报错先看第一条与相关类型；运行错误先分清坐标、更新、绘制还是事件时机。镜头不跟随查03/04与调用顺序；世界动而文字也动查05范围；穿墙先查02再06再07；没声音先区分事件没调用与老师提供的音频设备/资源问题。</p><h3>读评测，不把阻塞当通过</h3><p><code>TODO_STATUS id passed total</code>列出01–09的通过数与总数。<code>TODO_BLOCKED id prerequisite</code>说明缺哪项前置；<strong>0/0是未执行，不是通过</strong>。九组都要有实际检查且全通过。重点先后关系：02→06→07，03→04。第10没有自动评分，自己解释给老师听。</p><p>若合法的其他世界尺寸被判错，把预测、数值、输出带给老师，不要为了当前输出随意改预期。评测只能检查已定义行为，不保证体验或音量合适，也没有解决高速穿墙。</p></section><section id="checklist"><h2>总清单</h2><p>勾选只在当前打开的页面有效，不保存或跨服务同步。需要长期记录，复制到自己的笔记。</p><div id="checks"><label class="check"><input id="check-01" type="checkbox">01 把地图扩到窗口以外：验证并解释</label><label class="check"><input id="check-02" type="checkbox">02 把一格变成世界矩形：验证并解释</label><label class="check"><input id="check-03" type="checkbox">03 初始化镜头：验证并解释</label><label class="check"><input id="check-04" type="checkbox">04 让镜头每帧跟随：验证并解释</label><label class="check"><input id="check-05" type="checkbox">05 世界跟着镜头，文字留在屏幕：验证并解释</label><label class="check"><input id="check-06" type="checkbox">06 让整个身体检测墙：验证并解释</label><label class="check"><input id="check-07" type="checkbox">07 留在世界里，并能沿墙移动：验证并解释</label><label class="check"><input id="check-08" type="checkbox">08 子弹成功生成才响：验证并解释</label><label class="check"><input id="check-09" type="checkbox">09 实际扣血就响，包括没死：验证并解释</label><label class="check"><input id="check-10" type="checkbox">10 自己出一道会找出错误的题：验证并解释</label></div><pre id="all-tasks">01 把地图扩到窗口以外 | src/main.cpp | 地图常量；InitMap | TODO(L3-01-A) / TODO(L3-01-B)
+02 把一格变成世界矩形 | src/main.cpp | CellRect | TODO(L3-02)
+03 初始化镜头 | src/main.cpp | InitCamera | TODO(L3-03)
+04 让镜头每帧跟随 | src/main.cpp | UpdateCamera | TODO(L3-04)
+05 世界跟着镜头，文字留在屏幕 | src/main.cpp | DrawGame | TODO(L3-05)
+06 让整个身体检测墙 | src/main.cpp | HitsWall | TODO(L3-06)
+07 留在世界里，并能沿墙移动 | src/main.cpp | InsideWorld；UpdatePlayer | TODO(L3-07-A) / TODO(L3-07-B)
+08 子弹成功生成才响 | src/main.cpp | FireBullets | TODO(L3-08)
+09 实际扣血就响，包括没死 | src/main.cpp | HandleHits | TODO(L3-09)
+10 自己出一道会找出错误的题 | src/my_cases.h | myCase（src/my_cases.h） | TODO(L3-10)</pre><button type="button" data-copy="all-tasks">复制总清单</button><p id="copy-status" role="status" aria-live="polite"></p></section><footer>本页学习内容可离线阅读；字体与自动进度在线加载。用户名与主题仅保存在当前浏览器，GitHub 查询只读取公开练习分支。十项按自己的学习速度分阶段完成。</footer></main></div><script>
+document.querySelectorAll('[data-copy]').forEach(button=>button.addEventListener('click',async()=>{const node=document.getElementById(button.dataset.copy);const status=document.getElementById('copy-status');try{if(!navigator.clipboard)throw new Error('clipboard unavailable');await navigator.clipboard.writeText(node.textContent);status.textContent='已复制，可回到编辑器粘贴。';button.textContent='已复制';}catch(error){const range=document.createRange();range.selectNodeContents(node);const selection=window.getSelection();selection.removeAllRanges();selection.addRange(range);status.textContent='自动复制不可用，文本已选中；请按Ctrl+C（手机长按复制）。';button.textContent='请手动复制';}}));
+(function(){var key="rogue-hb",button=document.getElementById("theme"),themes=["system","light","dark"],labels={system:"跟随系统",light:"浅色",dark:"深色"};function read(){try{return JSON.parse(localStorage.getItem(key))||{};}catch(e){return {};}}function apply(){var theme=read().theme;if(!themes.includes(theme))theme="system";if(theme==="system")document.documentElement.removeAttribute("data-theme");else document.documentElement.dataset.theme=theme;button.textContent="主题："+labels[theme];}button.addEventListener("click",function(){var data=read(),theme=themes.includes(data.theme)?data.theme:"system";data.theme=themes[(themes.indexOf(theme)+1)%themes.length];try{localStorage.setItem(key,JSON.stringify(data));}catch(e){if(data.theme==="system")document.documentElement.removeAttribute("data-theme");else document.documentElement.dataset.theme=data.theme;button.textContent="主题："+labels[data.theme];return;}apply();});window.addEventListener("storage",function(e){if(e.key===key||e.key===null)apply();});apply();})();</script><script src="../todo-progress.js" defer></script></body></html>

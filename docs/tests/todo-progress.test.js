@@ -102,6 +102,25 @@ test('clearing the account discards an in-flight old result', async () => {
 });
 
 
+test('lesson 3 accepts nine automatic tasks, excludes manual task ten, and preserves blockers', () => {
+  const list = [1,2,3,4,5,8,9].map(n=>status(n,1,1,'success',3));
+  list.push({context:'course/lesson-3/todo-6',description:'blocked by task 2',state:'error'},
+    status(7,0,0,'success',3),status(10,1,1,'success',3));
+  const found = parseStatuses({statuses:list},3);
+  assert.equal(found[9],'pass');
+  assert.equal(found[6],'blocked');
+  assert.equal(found[7],'unavailable');
+  assert.equal(found[10],undefined);
+});
+
+test('lesson 3 cannot pass with only six statuses; nine passes still require manual task ten', async () => {
+  const run = response({workflow_runs:[{head_sha:sha,status:'completed',conclusion:'success'}]});
+  mock(response({commit:{sha}}),run,response({statuses:[1,2,3,4,5,6].map(n=>status(n,1,1,'success',3))}));
+  assert.equal((await lookup('student',3)).state,'partial');
+  mock(response({commit:{sha}}),run,response({statuses:[1,2,3,4,5,6,7,8,9].map(n=>status(n,1,1,'success',3))}));
+  assert.equal((await lookup('student',3)).state,'pass');
+});
+
 test('GitHub rate limiting is distinct from a missing branch', async () => {
   mock(response({},403));
   await assert.rejects(lookup('student',1),/rate/);
