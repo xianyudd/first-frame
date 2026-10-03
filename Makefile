@@ -1,5 +1,7 @@
 CXX ?= g++
 CXXFLAGS ?= -std=c++17 -Wall -Wextra -O2
+VERBOSE ?= 0
+TEST_ARGS := $(if $(filter 1,$(VERBOSE)),--verbose)
 HEADERS := $(wildcard src/*.h)
 ifeq ($(OS),Windows_NT)
 EXE := .exe
@@ -32,6 +34,6 @@ todo:
 # Console-only headless checks; real failures stop make.
 test: src/main.cpp tests/test_todos.cpp $(HEADERS) tests/fake_audio_backend.h | build
 	$(CXX) $(CXXFLAGS) $(RAYLIB_CFLAGS) tests/test_todos.cpp -o build/test-todos$(EXE) $(RAYLIB_LIBS)
-	./build/test-todos$(EXE)
+	./build/test-todos$(EXE) $(TEST_ARGS)
 clean:
 	$(RM) "$(GAME_OUT)" build/test-todos$(EXE)

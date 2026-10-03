@@ -54,22 +54,29 @@ static bool TestKeyPressed(int key) { return key>=0 && key<512 && keyPressed[key
 #undef IsKeyPressed
 static int passed=0, failed=0, sectionPassed=0, sectionTotal=0, currentTask=0, blocked=0;
 static bool completed[10]={};
+static bool verbose=false;
+static const char* taskNames[]={"", "World map configuration", "Tile coordinates", "Camera initialization",
+    "Camera following", "World and HUD drawing", "Wall collision", "World bounds and axis movement",
+    "Bullet allocation and shot sound", "Enemy hits and hit sound"};
 static void check(const char* name, double expected, double actual, int line) {
     const bool ok=std::fabs(expected-actual)<0.0001;
     ++sectionTotal; if(ok) { ++passed; ++sectionPassed; } else ++failed;
-    std::printf("[%s] Task %02d: %s (expected %.6g, got %.6g) (test_todos.cpp:%d)\n",
-                ok?"PASS":"FAIL",currentTask,name,expected,actual,line);
+    if(verbose || !ok)
+        std::printf("[%s] Task %02d: %s (expected %.6g, got %.6g) (test_todos.cpp:%d)\n",
+                    ok?"PASS":"FAIL",currentTask,name,expected,actual,line);
 }
 #define CHECK(n,e,a) check(n,e,a,__LINE__)
-static void begin(int id) { currentTask=id; sectionPassed=sectionTotal=0; std::printf("\nTask %02d\n",id); }
+static void begin(int id) { currentTask=id; sectionPassed=sectionTotal=0; std::printf("\nTask %02d: %s\n",id,taskNames[id]); }
 static void end(int id) {
     completed[id]=sectionTotal>0 && sectionPassed==sectionTotal;
+    std::printf("Task %02d: %s - %d/%d %s\n",id,taskNames[id],sectionPassed,sectionTotal,completed[id]?"PASS":"FAIL");
     std::printf("TODO_STATUS %d %d %d\n",id,sectionPassed,sectionTotal);
 }
 static bool prerequisite(int id,int prior) {
     if(completed[prior]) return true;
     ++blocked;
-    std::printf("Task %02d not executed: first complete Task %02d\nTODO_BLOCKED %d %d\nTODO_STATUS %d 0 0\n",id,prior,id,prior,id);
+    std::printf("\nTask %02d: %s - 0/0 BLOCKED; first complete Task %02d\n",id,taskNames[id],prior);
+    std::printf("TODO_BLOCKED %d %d\nTODO_STATUS %d 0 0\n",id,prior,id);
     return false;
 }
 static void resetFixture() {
@@ -321,7 +328,11 @@ static void hits() {
     CHECK("overlapping enemies only one sound",1,audioHits);
     CHECK("overlapping enemies only one HP lost",2*cfg.maxHp-1,enemies[0].hp+enemies[1].hp); end(9);
 }
-int main() {
+int main(int argc, char** argv) {
+    for(int i=1;i<argc;++i) {
+        if(std::strcmp(argv[i],"--verbose")==0) verbose=true;
+        else { std::fprintf(stderr,"Unknown argument: %s\nUsage: test-todos [--verbose]\n",argv[i]); return 2; }
+    }
     mapConfiguration(); coordinates(); cameraInit(); cameraFollow(); drawing(); walls(); movement(); shots(); hits(); UnloadGameAudio();
     std::printf("\nTotal: %d passed, %d failed, %d blocked; Task 10 requires human review\n",passed,failed,blocked);
     return (failed || blocked)?1:0;
