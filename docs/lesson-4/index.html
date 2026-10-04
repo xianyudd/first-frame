@@ -21,26 +21,29 @@
 <div class="layout">
 <nav aria-label="任务导航"><strong>生存三分钟</strong><p class="tag"><a href="../">← 课程主页</a> · 第 4 课</p><p><a href="../lesson-3/">回顾第 3 课</a> · <a href="../git/">Git 手册</a></p>
 <div class="links"><a href="#start">开始前：准备与代码</a><a href="#task-01">01 最大血量与血条</a><a href="#task-02">02 受伤后无敌</a><a href="#task-03">03 闪烁与受伤声</a><a href="#task-04">04 三分钟胜负</a><a href="#task-05">05 结算与重开</a><a href="#task-06">06 自选实验</a><a href="#homework">课后：A/B 选一</a><a href="#checklist">总清单与排错</a></div>
-<button class="themebtn" id="theme" type="button">主题：跟随系统</button><p class="tag">学习说明先准备；课包与自动评测待提供。这里没有自动成绩。</p></nav>
+<button class="themebtn" id="theme" type="button">主题：跟随系统</button><p class="tag">按六项任务分段阅读，完成后演示与解释。</p></nav>
 <main id="content" tabindex="-1">
 <header><p class="muted">第 4 课 · 血条 → 受伤反馈 → 胜负 → 重开</p><h1>生存三分钟</h1><p>上一课让大地图、镜头、墙和声音一起工作。这次让玩家能看清血量，受伤后获得短暂保护，撑满三分钟获胜。先做小改动，再自己安排更新流程。</p></header>
 <section id="start"><h2>开始前：准备与代码</h2>
-<div class="callout warn"><strong>当前是学习说明，不是已交付课包。</strong>第 4 课起始代码、定位标记、受伤音效与自动评测尚未提供。现在可以读代码、纸上推演；收到老师确认的课包后再按任务实现。不要寻找或创建所谓已有的第 4 课起点，也不要覆盖第 3 课成果。</div>
-<p>准备好能编译运行的 L3 成果，先确认镜头跟随、挡墙和子弹命中正常；保留备份。收到课包后打开 <code>src/main.cpp</code>，用函数名查找位置，本页不假定新的源码标记已经存在。</p>
-<p><strong>L3 代码导览：</strong><code>Player</code>目前只有 <code>rect/speed/hp</code>；<code>InitGame</code>设置玩家并清空子弹、怪物和分数。<code>UpdateEnemies</code>处理怪物接触玩家，原来扣 10 血并让怪物失活；<code>HandleHits</code>处理子弹命中怪物，不是玩家受伤。<code>DrawGame</code>在相机内画世界，相机外画 HUD；<code>main</code>循环安排更新、音乐、绘制。</p>
-<p><strong>本课拟新增：</strong><code>player.maxHp</code>最大血量、<code>player.invulnerableTime</code>无敌剩余秒数、<code>elapsedTime</code>已生存秒数、<code>killCount</code>击败数；用 <code>GameState::Playing/Won/Lost</code>表示进行中/胜利/失败，<code>SURVIVAL_SECONDS</code>为 180 秒。这些不是 L3 现有字段。变量用 lowerCamelCase，函数用 PascalCase，常量用 UPPER_SNAKE_CASE；缩进四空格，仅写必要的简短中文注释。</p>
+<div class="callout warn"><strong>当前是学习说明，不是已交付课包。</strong>第 4 课起始代码、定位标记、受伤音效与自动评测尚未提供。现在可以读代码、纸上推演；收到老师确认的课包后再实现，保留第 3 课备份。</div>
+<p>先确认 L3 镜头跟随、挡墙和子弹命中正常。收到课包后打开 <code>src/main.cpp</code>，用函数名查找位置。</p>
+<p><strong>先找文件末尾的 <code>int main()</code>：</strong><code>while</code>前的 <code>InitGame()</code>是开局；循环内每轮是按键 → 玩家/子弹 → 刷怪 <code>SpawnEnemies</code>、接触 <code>UpdateEnemies</code>、命中 <code>HandleHits</code> → 镜头/音乐 → <code>DrawGame</code>。Enter、TAB 重开才再调用 <code>InitGame</code>。</p>
+<p>文件上方的同一个 <code>player</code>和子弹、怪物数组供各函数共享：初始化重置，更新修改，绘制只读来画，不用各建一份数据。</p>
+<p><strong>拟新增数据：</strong>在 <code>Player</code>内声明 <code>int maxHp = 100;</code>（用 <code>player.maxHp</code>访问）和 <code>float invulnerableTime = 0.0f;</code>（无敌剩余秒数）。</p>
+<p>在文件上方 <code>Player player</code>、<code>score</code>等全局数据旁、<code>ConfigOf</code>定义之前声明全局 <code>float elapsedTime = 0.0f;</code>（生存秒数）、<code>int killCount = 0;</code>（击败数）、<code>const float SURVIVAL_SECONDS = 180.0f;</code>（目标秒数）。小数计时用 float，不用 int；状态在 04 引入。</p>
+<p>变量 lowerCamelCase，函数 PascalCase，常量 UPPER_SNAKE_CASE；四空格缩进，必要注释用简短中文。</p>
 </section>
 <section id="task-01"><h2>01 · 最大血量与血条</h2><dl>
 <dt>要做什么</dt><dd>在固定 HUD 中画血条，初始血量与最大血量都是 100，血量减少时填充变短。</dd>
 <dt>先知道什么</dt><dd>比例＝当前血量÷最大血量。整数 <code>50 / 100</code>得到 0，要先做浮点除法：<code>static_cast&lt;float&gt;(player.hp) / player.maxHp</code>。最大血量必须大于 0；<code>DrawGame</code>只把局部显示比例夹紧在 0..1，不修改 <code>player.hp</code>，伤害处理处负责让 HP 最低为 0。满条取 200 像素，则 100/100、50/100、0/100 分别填 200、100、0 像素，最后用 <code>static_cast&lt;int&gt;</code>转成整数宽度。</dd>
-<dt>改哪里<br>怎么推进</dt><dd><ol><li>扩充 <code>Player</code>；检查 <code>InitGame</code>里的旧花括号初始化。新增字段后，优先逐字段赋值，不猜聚合初始化的字段顺序。</li><li>设置 <code>player.maxHp = 100</code>，再用它设置当前血量；重开也应恢复。</li><li>在 <code>DrawGame</code>的 <code>EndMode2D()</code>之后，用 <code>DrawRectangle(x, y, width, height, color)</code>先画底条再画填充，另用 <code>DrawText</code>显示血量。选不遮住旧文字的位置。</li></ol></dd>
+<dt>改哪里<br>怎么推进</dt><dd><ol><li>扩充 <code>Player</code>；检查 <code>InitGame</code>里的旧花括号初始化。新增字段后，优先逐字段赋值，不猜聚合初始化的字段顺序。</li><li>设置 <code>player.maxHp = 100</code>，再用它设置当前血量；重开也应恢复。</li><li>在 <code>DrawGame</code>找到 <code>EndMode2D()</code>，往下看旧 HUD 背景与文字。血条放在这些绘制之后、原 <code>if (gameOver)</code>结算分支之前，仍在 <code>EndDrawing()</code>之前。用 <code>DrawRectangle(x, y, width, height, color)</code>先画底条再画填充，另用 <code>DrawText</code>显示血量；位置不挡旧文字。先画固定 200 像素条，确认看得见，再接比例测 50/0 血。后画的背景会盖住先画的条。</li></ol></dd>
 <dt>验证</dt><dd>临时分别设 100、50、0 血，核对 200、100、0 像素；再试负血量应显示空条而非反向条。走远后血条仍固定在屏幕；撤掉临时设值，Enter 恢复 100/100。</dd></dl>
 <details><summary>额外排错：半血却空了？</summary><p>先单独算除法，再算像素。若得到 0，检查转换是否发生在除法之前；绘制位置正确但宽度错，先别改相机。</p></details></section>
 <section id="task-02"><h2>02 · 受伤后 0.8 秒无敌</h2><dl>
 <dt>要做什么</dt><dd>有效接触扣 10 血后，立即保护玩家 0.8 秒。L4 接触不再让怪物消失，也不算击败。</dd>
-<dt>先知道什么</dt><dd>无敌是剩余时间，不是帧数。在 <code>main</code>每帧只调用一次 <code>GetFrameTime()</code>，保存为 <code>float dt</code>，单位秒；需要计时的函数通过参数获得同一份 dt。倒计时每帧减 dt，减完低于 0 就设为 0。本课只把计时改成秒，不把角色、子弹和怪物速度全部改写。</dd>
-<dt>改哪里<br>怎么推进</dt><dd><ol><li><code>InitGame</code>把 <code>player.invulnerableTime</code>设为 0。</li><li>在进行中的每帧、怪物接触判断之前，只减少一次倒计时；别在怪物循环里反复减。</li><li>在 <code>UpdateEnemies</code>找到接触分支：重叠且无敌时间为 0 才扣血，血量最低为 0；扣血后立即把无敌时间设为 <code>0.8f</code>。后面的怪物就会看到保护已经生效。</li><li>删除接触导致怪物失活的旧行为，保留怪物追击与墙判断；不要改子弹命中的失活规则。</li></ol></dd>
-<dt>验证</dt><dd>用临时可控设置放两只活动怪物与玩家重叠，HP 从 100 开始：同一帧后是 90，不是 80，怪物仍活动。随后倒计时从 0.8 减去 0.3，得到约 0.5；再减 0.6，归零。保护期间接触仍是 90，归零后接触变 80。验收后移除临时设置。</dd></dl>
+<dt>先知道什么</dt><dd>无敌时间用秒，不用帧数。在 <code>main</code>的 <code>while</code>内、按键处理之后，每帧只调用一次 <code>GetFrameTime()</code>，保存为 <code>float dt</code>。倒计时减 dt，低于 0 就设为 0；本课不改角色、子弹和怪物的原速度单位。</dd>
+<dt>改哪里<br>怎么推进</dt><dd><ol><li><code>InitGame</code>把 <code>player.invulnerableTime</code>设为 0。</li><li>在现有 <code>if (!gameOver)</code>花括号内、<code>UpdatePlayer()</code>之前只减一次倒计时。本项先保留旧条件，04 再换成 Playing；无需改 <code>UpdateEnemies</code>签名。若自建计时函数，才传 dt 并同步声明、定义和调用。</li><li>在 <code>UpdateEnemies</code>找到接触分支：重叠且无敌时间为 0 才扣血，血量最低为 0；扣血后立即把无敌时间设为 <code>0.8f</code>。后面的怪物就会看到保护已经生效。</li><li>删除接触导致怪物失活的旧行为，保留怪物追击与墙判断；不要改子弹命中的失活规则。</li></ol></dd>
+<dt>验证</dt><dd>在 <code>main</code>中 <code>while</code>前那次 <code>InitGame()</code>之后，仅一次设 HP=100、<code>player.invulnerableTime=0.0f</code>，放两只 <code>rect=player.rect</code>、<code>active=true</code>的怪物；按已有 <code>Enemy</code>声明补合法 kind 和 hp。设置不放进 <code>while</code>；测试不按移动键、Enter 或 TAB：首帧后 HP=90，不是 80，两怪仍活动。纸上再算 0.8−0.3≈0.5、再减 0.6 归零，这不是自然帧 dt；实测保护期间仍 90，归零后接触变 80。撤掉临时设置。</dd></dl>
 <details><summary>额外提示：为什么不能最后才设无敌？</summary><p>按数组顺序画两个怪物的判断过程。若等循环结束才设保护，第二只怪物读到的仍是 0，就会再次扣血。</p></details></section>
 <aside class="stop"><h3>停止点一 · 血量与保护</h3><p>先展示满/半/空血条，解释浮点除法；再推演同帧两怪接触和保护归零。确认后再做反馈，不要同时改全部流程。</p></aside>
 <section id="task-03"><h2>03 · 闪烁与受伤声</h2><dl>
@@ -50,25 +53,42 @@
 <dt>验证</dt><dd>一次接触让 HP 100→90，约 0.8 秒内交替可见，之后稳定可见；按 G，消失的图像仍对应同一身体框。当前只验证闪烁和扣血事件时机；资源交付后再试听：这次受伤响一次，保护期间重复接触零次，子弹命中怪物仍用原命中声。</dd></dl>
 <details><summary>额外排错：为什么一直隐身？</summary><p>查保护结束后是否无条件恢复玩家绘制；不要让“闪烁的某一半周期”成为平时唯一的绘制条件。</p></details></section>
 <section id="task-04"><h2>04 · 三分钟胜负</h2><dl>
-<dt>要做什么</dt><dd>战斗模式中 HP 归零失败；仍活着撑满 180 秒胜利。结束时停止战斗和计时。</dd>
-<dt>先知道什么</dt><dd><code>enum class GameState { Playing, Won, Lost };</code>是拟新增的状态类型，用相等比较判断状态。在枚举之后、各函数之前声明全局 <code>GameState gameState = GameState::Playing;</code>，让 <code>InitGame/UpdateEnemies/main/DrawGame</code>共享当前状态。状态替代所有旧 <code>gameOver</code>判断，不能只新增枚举而留着两套互相矛盾的状态。计时在进行中加同一份 dt，显示剩余时间用 <code>SURVIVAL_SECONDS - elapsedTime</code>，最低为 0，累计值到终点也应封顶。</dd>
-<dt>改哪里<br>怎么推进</dt><dd>在 <code>InitGame</code>把状态重置为 Playing、时间重置为 0。02 先完成扣血与保护，到本项再接入结束状态：在 <code>UpdateEnemies</code>有效扣血且 HP 归零的位置，立即把 <code>gameState</code>设为 Lost 并 <code>return;</code>，停止整个函数，避免后续怪物继续移动；<code>break</code>只退出当前循环，不能代替退出整个函数。沿 <code>main</code>整理流程：处理按键 → Playing 时更新保护与计时 → 玩家/子弹/刷怪更新 → <code>UpdateEnemies</code>。函数返回后再次检查状态，只有 Playing 才执行 <code>HandleHits</code>和到时胜利判断，保证失败优先。结束后不再计时或更新战斗；镜头、音乐、<code>DrawGame</code>和下一帧的重开按键仍执行。</dd>
-<dt>验证</dt><dd>临时把 <code>SURVIVAL_SECONDS</code>改成 10，按 TAB 进入战斗模式并重开。存活到 10 秒应 Won，剩余时间 0；结束后等 2 秒，时间与战斗数据不变。可控设置 HP=10、已用时间=9.99、dt=0.02，并让怪物接触：这一帧应 Lost，不是 Won。恢复常量 180 后，正式用战斗模式验收三分钟；练习模式不刷怪，不能代替这项验收。</dd></dl>
-<p>现有音乐接口是 <code>UpdateGameAudio(bool gameOver)</code>。传入“状态不是 Playing”的比较结果，例如 <code>gameState != GameState::Playing</code>，不能把 enum 直接传给 bool 参数。结束暂停音乐，重开后比较结果变 false，原接口负责恢复。</p>
+<dt>要做什么</dt><dd>HP 归零失败；战斗模式活着撑满 180 秒胜利。练习模式不累计生存时间、不判到时胜利，仍可移动、射击、更新保护和人工测试接触；两种模式都可能因血量归零失败。结束停止战斗和计时。</dd>
+<dt>先知道什么</dt><dd><code>enum class GameState { Playing, Won, Lost };</code>定义状态类型，<code>GameState::Playing/Won/Lost</code>对应进行中/胜利/失败。在枚举之后、各函数之前声明全局 <code>GameState gameState = GameState::Playing;</code>，供各函数共享，替代所有旧 <code>gameOver</code>判断。只有 Playing 且 <code>!practiceMode</code>才加 dt 累计生存时间，累计值封顶；显示剩余时间用 <code>SURVIVAL_SECONDS - elapsedTime</code>，最低为 0。</dd>
+<dt>改哪里<br>怎么推进</dt><dd>
+<p><strong>A · 先接失败状态。</strong>在本 <code>src/main.cpp</code>搜索 <code>gameOver</code>，联动检查：</p>
+<ul>
+<li>旧全局声明换为上面的枚举和状态；<code>InitGame</code>旧重置改为 Playing。</li>
+<li><code>UpdateEnemies</code>有效扣血且 HP 归零的位置，立即设 Lost 并 <code>return;</code>，停止整个函数，后续怪物不再移动；<code>break</code>只退出当前循环，不能代替它。</li>
+<li><code>DrawGame</code>旧结算条件改为非 Playing；<code>main</code>旧更新条件改为 Playing，音乐实参用下面的 bool 桥接。</li>
+</ul>
+<p>找到 <code>main</code>含 <code>UpdateEnemies(); HandleHits();</code>的旧行，拆开两次调用；前者返回后，只有 Playing 才执行 <code>HandleHits</code>。这一组改齐再编译，不是删掉旧声明就停。先完成下面的 A 验收。</p>
+<p><strong>B · 再接战斗计时。</strong><code>InitGame</code>重置时间为 0。Playing 内仍更新保护、玩家、子弹、刷怪与接触；仅 <code>!practiceMode</code>在接触前累计时间。接触后仍 Playing 且是战斗模式，才判到时 Won，失败优先。练习由原刷怪函数跳过刷怪，不能把运动一起关掉。按键、镜头、音乐与 <code>DrawGame</code>留在战斗条件外；结束不再更新战斗或计时。</p>
+</dd>
+<dt>验证</dt><dd><ol>
+<li><strong>A：</strong>沿 02 的 <code>while</code>前入口，初始化后仅一次设 HP=10、保护=0，放一只合法活动怪物与玩家重叠；不按键。接触应 Lost，等待时战斗冻结；再按 Enter 应 Playing、HP=100、旧怪物清空。</li>
+<li><strong>B：</strong>临时把 <code>SURVIVAL_SECONDS</code>改成 10 秒。练习模式重开后等超过 10 秒：仍 Playing，<code>elapsedTime=0</code>。TAB 切战斗并重开，存活到 10 秒应 Won、剩余 0；再等 2 秒数据不变。</li>
+<li><strong>同帧死亡：</strong>设 <code>practiceMode=false</code>，调用 <code>InitGame</code>得到 Playing 并清空旧对象；更新前仅一次设 HP=10、保护=0、<code>elapsedTime=9.99f</code>，放一只合法活动怪物，其 <code>rect=player.rect</code>；其余怪物/子弹保持空，不按键。仅这一帧用 0.02 替代 dt：<code>UpdateEnemies</code>返回后应 Lost，不是 Won。撤掉测试设置，恢复 180 秒并验收战斗模式三分钟。</li>
+</ol></dd></dl>
+<p>现有音乐接口是 <code>UpdateGameAudio(bool gameOver)</code>，不改 <code>audio.h</code>的参数名。传入“状态不是 Playing”的比较结果，例如 <code>gameState != GameState::Playing</code>，不能把 enum 直接传给 bool 参数。结束暂停音乐，重开后比较结果变 false，原接口负责恢复。</p>
 <details><summary>额外排错：为何结束后还在计数？</summary><p>逐项检查战斗函数的调用条件。状态改变以后，不只下一帧要停，本帧剩下的战斗更新也要停。</p></details></section>
 <section id="task-05"><h2>05 · 击败数结算与 Enter 重开</h2><dl>
 <dt>要做什么</dt><dd>结束页区分胜利/失败，显示生存秒数、击败数和 Enter 重开说明；每局数据独立。</dd>
 <dt>先知道什么</dt><dd>击败数不是得分，也不是命中次数。一次怪物从活动变为死亡失活才加 1；一只重甲挨三枪仍只算一只。接触不失活、不增加 <code>killCount</code>，已经失活的怪物不再参与命中。</dd>
-<dt>改哪里<br>怎么推进</dt><dd>在 <code>HandleHits</code>已有“血量≤0 → 失活 → 加分”处分配计数，在 <code>DrawGame</code>相机范围外显示结算。结算保留已有 <code>score</code>得分显示，重开将它归零，不改变原加分规则。<code>InitGame</code>统一重置 HP、最大血量、保护、时间、计数、状态和旧子弹/怪物/分数等；保留镜头初始化。检查 <code>main</code>中 Enter 调用它的路径，以及 TAB 切换 <code>practiceMode</code>后调用它的路径；重开不应擅自改当前模式，G 仍只切视觉调试。音乐继续使用 04 的结束 bool 桥接。</dd>
+<dt>改哪里<br>怎么推进</dt><dd><ol>
+<li>在 <code>HandleHits</code>已有“血量≤0 → 失活 → 加分”的死亡分支给 <code>killCount</code>加 1，不改变加分规则。</li>
+<li>在 <code>InitGame</code>的 <code>score</code>清零旁重置 <code>killCount</code>。先验收计数和重开，再补文字。其他新增数据也在这里重置，保留原清空对象与镜头初始化。</li>
+<li><code>DrawGame</code>读计数，在 04 改好的结算分支内补胜负、生存时间、击败数及已有 <code>score</code>得分文字，用屏幕坐标；重开得分归零。</li>
+</ol><p>Enter、TAB 原本已调用 <code>InitGame</code>，无需重写按键逻辑，检查这两条路径都能重置。重开保留当前模式，G 仍只切视觉调试；音乐沿用 04 的 bool 桥接。</p></dd>
 <dt>验证</dt><dd>一只 3 血重甲：前两枪 killCount=0，第三枪=1，之后空枪仍=1；再击败普通怪变 2。结束后按 Enter：HP=100、保护=0、时间=0、killCount=0、Playing，旧弹怪消失、镜头回出生点、音乐恢复。再按 TAB，模式确实切换且同样重置；按 G 不改变这些数值。</dd></dl>
 <details><summary>额外排错：重开还在结算？</summary><p>分别查结算的状态条件和 InitGame 的状态重置；别只清文字。再检查是否仍有旧 gameOver 判断挡住更新。</p></details></section>
-<aside class="stop"><h3>停止点二 · 完整的一局</h3><p>演示失败、短时胜利与两种重开路径，解释同帧死亡优先。受伤声若资源尚缺，单独记为待接入，不把它说成已经完成。</p></aside>
+<aside class="stop"><h3>停止点二 · 完整的一局</h3><p>演示失败、短时胜利与两种重开路径，解释同帧死亡优先。</p></aside>
 <section id="task-06"><h2>06 · 自己设计一个边界实验</h2><dl>
 <dt>要做什么</dt><dd>选一个最容易被写错的规则，自己给出输入、预期和理由，再验证。</dd>
 <dt>先知道什么</dt><dd>预期要由规则推出，不能照当前输出倒填。例如无敌刚好归零、同帧多怪、结束后一颗弹本来会击杀怪物、重开残留保护，都可成为测试题。</dd>
-<dt>改哪里<br>怎么推进</dt><dd>自己选择相关的初始化或函数入口，用最少的临时改动安排场景；先写 HP、秒数、活动对象和状态，再画这一帧调用顺序。当前没有 L4 测试入口或自动评分，使用纸上推演加受控手测；保留原测试文件，完成后撤掉临时改动。</dd>
+<dt>改哪里<br>怎么推进</dt><dd>自己选择相关的初始化或函数入口，用最少的临时改动安排场景；先写 HP、秒数、活动对象和状态，再画这一帧调用顺序。使用纸上推演加受控手测，完成后撤掉临时改动。</dd>
 <dt>验证</dt><dd>交一条“输入 → 预期 HP/时间/killCount/状态 → 实际 → 理由”的记录。指出它能抓住哪种错误；若不同，缩小场景后再判断是实现还是预期错。</dd></dl></section>
-<section id="homework"><h2>课后：补主线，再从 A/B 选一</h2><p><strong>A · 血量显示实验：</strong>比较最大血量 100 和 150 的两组比例，自己选一个非整数像素结果，先算再画。只改变血条尺寸或文字布局，不改伤害规则；解释转成整数后的差异。</p><p><strong>B · 胜负与重开实验：</strong>自行设计两条操作序列，其中一条包含“结束 → TAB → Enter”，逐步预测模式、状态、时间和击败数，再实测。保留 180 秒主线版本，短时实验完成后恢复常量。</p><p>带来所选题、预测、实际记录和一次排错过程。若课包仍未交付，先完成纸上方案，明确哪些实测待做，不声称程序已通过。</p></section>
+<section id="homework"><h2>课后：补主线，再从 A/B 选一</h2><p><strong>A · 血量显示实验：</strong>比较最大血量 100 和 150 的两组比例，自己选一个非整数像素结果，先算再画。只改变血条尺寸或文字布局，不改伤害规则；解释转成整数后的差异。</p><p><strong>B · 胜负与重开实验：</strong>自行设计两条操作序列，其中一条包含“结束 → TAB → Enter”，逐步预测模式、状态、时间和击败数，再实测。保留 180 秒主线版本，短时实验完成后恢复常量。</p><p>带来所选题、预测、实际记录和一次排错过程。</p></section>
 <section id="checklist"><h2>总清单与排错</h2><p>下面是人工检查，不连接 GitHub 成绩；勾选仅本次页面有效，刷新不保留。</p>
 <label class="check"><input type="checkbox">01 满/半/空血条正确，HUD 不漂移</label>
 <label class="check"><input type="checkbox">02 同帧只伤一次，保护归零正确，接触怪物不消失</label>
@@ -82,7 +102,7 @@
 最小代码：能复现问题的局部片段
 推断：下一步只验证哪个猜测</pre>
 <p>收到课包后按其真实编译与测试说明操作；当前没有 L4 的 make test 结果、分支或提交约定。编译成功不等于玩法正确，最终仍需演示并解释。</p></section>
-<footer>学习内容可离线阅读；字体在线加载，本页不加载成绩或音频。课包、受伤音效与自动评测待提供。主题只保存在当前浏览器，不能保存时仍可切换。</footer>
+<footer>学习内容可离线阅读；字体在线加载，本页不加载成绩或音频。主题只保存在当前浏览器，不能保存时仍可切换。</footer>
 </main></div>
 <script>
 (function(){
