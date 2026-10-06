@@ -2,7 +2,7 @@
   "use strict";
   var REPO = "first-frame", KEY = "rogue-hb", CACHE = "rogue-todo-cache";
   var NAME = /^[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38}$/i;
-  var TASK_COUNTS = {1:4, 2:6, 3:9}; // Automatic groups only; L3 task 10 is manual.
+  var TASK_COUNTS = {1:4, 2:6, 3:9, 4:5}; // 仅自动组；L3 的 10、L4 的 06 人工验收。
   function taskCount(lesson) { return TASK_COUNTS[lesson] || 0; }
   var LABEL = {blocked:"前置任务未通过（未执行）", idle:"未连接", none:"尚未提交", waiting:"等待本次评测", run:"评测中", pass:"通过", partial:"部分通过", fail:"未通过", unknown:"暂无逐项结果", unavailable:"评测不可用", rate:"GitHub 查询限流", network:"读取失败", cached:"上次记录（未核实最新）"};
   var POLL = 90000, MAX_POLL = 4, STALE = 180000;
@@ -100,6 +100,7 @@
       badge.className = "badge " + (result.state === "pass" ? "pass" : result.state === "run" ? "run" : result.state === "partial" ? "fail" : "idle");
       badge.textContent = result.state === "pass" ? "✓ " + done + " / " + total + " 项通过" : result.state === "partial" ? done + " / " + total + " 项通过" : LABEL[result.state];
       if (lesson === 3) badge.textContent += " · 10 人工验收";
+      if (lesson === 4) badge.textContent += " · 06 人工验收";
     }
     if (document.body.getAttribute("data-lesson") === String(lesson)) {
       var count = document.getElementById("pcount"), fill = document.getElementById("pfill"), bar = document.querySelector('[role="progressbar"]');

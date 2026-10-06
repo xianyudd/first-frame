@@ -121,6 +121,38 @@ test('lesson 3 cannot pass with only six statuses; nine passes still require man
   assert.equal((await lookup('student',3)).state,'pass');
 });
 
+test('lesson 4 exposes five automatic passes and ignores manual task six', async () => {
+  const list = [1,2,3,4,5,6].map(n=>status(n,1,1,'success',4));
+  assert.deepEqual(parseStatuses({statuses:list},4), {1:'pass',2:'pass',3:'pass',4:'pass',5:'pass'});
+  mock(response({commit:{sha}}),response({workflow_runs:[{head_sha:sha,status:'completed',conclusion:'success'}]}),response({statuses:list}));
+  assert.equal((await lookup('student',4)).state,'pass');
+});
+
+test('lesson 4 unfinished or missing groups cannot become complete', async () => {
+  const run = response({workflow_runs:[{head_sha:sha,status:'completed',conclusion:'failure'}]});
+  const list = [1,2,3,4,5].map(n=>status(n,n===1 ? 1 : 0,2,'failure',4));
+  mock(response({commit:{sha}}),run,response({statuses:list}));
+  const result = await lookup('student',4);
+  assert.equal(result.state,'partial');
+  assert.equal(result.items[1],'partial');
+  assert.equal(result.items[5],'fail');
+  mock(response({commit:{sha}}),run,response({statuses:[1,2,3,4].map(n=>status(n,1,1,'success',4))}));
+  assert.equal((await lookup('student',4)).state,'partial');
+});
+
+test('lesson 4 unavailable and malformed counts are never passing', async () => {
+  const list = [1,2,3,4,5].map(n=>({context:`course/lesson-4/todo-${n}`,description:'grading unavailable',state:'error'}));
+  mock(response({commit:{sha}}),response({workflow_runs:[{head_sha:sha,status:'completed',conclusion:'failure'}]}),response({statuses:list}));
+  assert.equal((await lookup('student',4)).state,'unavailable');
+  assert.deepEqual(parseStatuses({statuses:[status(1,0,0,'success',4),status(2,2,1,'success',4),status(3,1,101,'failure',4)]},4),{1:'unavailable',2:'unavailable',3:'unavailable'});
+});
+
+test('lesson 4 older SHA cannot certify the newest commit', async () => {
+  const calls = mock(response({commit:{sha}}),response({workflow_runs:[{head_sha:'b'.repeat(40),status:'completed',conclusion:'success'}]}));
+  assert.deepEqual(await lookup('student',4),{state:'waiting',sha});
+  assert.equal(calls.length,2);
+});
+
 test('GitHub rate limiting is distinct from a missing branch', async () => {
   mock(response({},403));
   await assert.rejects(lookup('student',1),/rate/);
