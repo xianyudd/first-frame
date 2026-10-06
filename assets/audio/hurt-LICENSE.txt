@@ -1,0 +1,14 @@
+Original lesson 4 procedural hurt cue — CC0 1.0 Universal
+
+Scope: hurt.wav only. This new sound was synthesized for this lesson
+from mathematical oscillators, without third-party samples or recordings.
+This dedication does not relicense the existing sprites, other course
+materials, the generator script or surrounding software.
+
+To the extent permitted by law, copyright and related rights in this
+original audio file are dedicated to the public domain under CC0 1.0
+Universal. You may copy, modify, distribute and perform it without
+permission or attribution. The file is provided without warranty.
+
+Full legal instrument:
+https://creativecommons.org/publicdomain/zero/1.0/legalcode

@@ -1,11 +1,11 @@
-#ifndef ASSETS_H
-#define ASSETS_H
+#ifndef L4_ASSETS_H
+#define L4_ASSETS_H
 #include "raylib.h"
 
 enum class SpriteId { Player, Bullet, Grunt, Runner, Heavy, Elite, Floor, Wall, COUNT };
-static Texture2D g_tex[(int)SpriteId::COUNT];
-static Rectangle g_crop[(int)SpriteId::COUNT];
-static const char* g_paths[(int)SpriteId::COUNT] = {
+inline Texture2D g_tex[(int)SpriteId::COUNT];
+inline Rectangle g_crop[(int)SpriteId::COUNT];
+inline const char* g_paths[(int)SpriteId::COUNT] = {
     "assets/player.png", "assets/bullet.png", "assets/grunt.png", "assets/runner.png",
     "assets/heavy.png", "assets/elite.png", "assets/floor.png", "assets/wall.png"
 };

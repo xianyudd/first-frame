@@ -1,0 +1,27 @@
+{
+  "copied_from": "l3-lesson/assets",
+  "scope": "Existing course assets reused from L3 with identical bytes. No new third-party asset was fetched.",
+  "audio_license": "audio/LICENSE.txt (CC0-1.0, only the three WAV files)",
+  "sprite_provenance": "The sprites were generated or drawn specifically for this course, not downloaded from third parties, as personally confirmed by the user. The L4 PNG files reuse the L3 bytes identified below.",
+  "user_confirmation": {
+    "date": "2026-10-06",
+    "method": "User answer to AskUserQuestion, relayed by the coordinator",
+    "answer": "为课程自行生成或绘制"
+  },
+  "sprite_record_limit": "Complete original generation records for the current sprite set were not retained. This record does not claim reproducibility or invent an author, a generator history or a separate PNG license. The audio CC0 dedication does not apply to the PNG files.",
+  "files": {
+    "audio/LICENSE.txt": "e1746966cd83fcc52372cb431c6b81015b18e881684bf9ebd54f8a67ed8617cd",
+    "audio/bgm.wav": "834e72db10f1aa8b8b4e9b6de50798d14dc8b3501e2f31d6fde425af6d6ff229",
+    "audio/hit.wav": "9cb55281c18dd4ed33f54c020b368352f02a544cd69bad7dc9dcb4c5d68e1530",
+    "audio/shoot.wav": "26ea5eca52dde2361fdff27a12787ce21aa89b4cd0f6909dcdeaf89a2af46b6b",
+    "audio/source.json": "f9f79ae90207927db30897d2cf1d039f27ba60c83432289c097a3723dbd2e51f",
+    "bullet.png": "a678eb1625543f51be8ae4a8fb70282c2ae0a7e89fe93037edf5684b43384c1f",
+    "elite.png": "d2e4ffcca4b4d1b99cb5018169b6414b97090635650d0862cde86fbd9a1795d9",
+    "floor.png": "ff9946f1f4fd75384b40f14f10ebe0a4a2ad32d603b47701f868e3152d8afff7",
+    "grunt.png": "33fd9951732a4226430f858fd1adc02931b6b9801a00bf9113ef0b7ea8b53e13",
+    "heavy.png": "23b0307b1e9751cc9ad14d47978d50f00796117e8a45d81ddb6c6ece1eb46a35",
+    "player.png": "e4d535ceb0517a68700dcc91785e6ea94befdc2e14e1f6f6c245b4ba9d7534d0",
+    "runner.png": "632dc99430c1cb69723a16c2db9778303c03bec5d55c83b290ce9c234fa70b34",
+    "wall.png": "efe71c01e3bcc9f5a3d5a7b8875cfc5b5e7ca5e584968ec05f8488a500567954"
+  }
+}

@@ -1,17 +1,18 @@
-#ifndef L3_AUDIO_H
-#define L3_AUDIO_H
+#ifndef L4_AUDIO_H
+#define L4_AUDIO_H
 #include "raylib.h"
 
-#ifndef L3_AUDIO_TEST
+#ifndef L4_AUDIO_TEST
 namespace AudioBackend {
 inline Music music{};
-inline Sound shot{}, hit{};
+inline Sound shot{}, hit{}, hurt{};
 inline bool deviceOwned = false;
-inline bool musicLoaded = false, shotLoaded = false, hitLoaded = false;
+inline bool musicLoaded = false, shotLoaded = false, hitLoaded = false, hurtLoaded = false;
 inline void Unload() {
     if (musicLoaded) { UnloadMusicStream(music); musicLoaded = false; }
     if (shotLoaded) { UnloadSound(shot); shotLoaded = false; }
     if (hitLoaded) { UnloadSound(hit); hitLoaded = false; }
+    if (hurtLoaded) { UnloadSound(hurt); hurtLoaded = false; }
     if (deviceOwned) { CloseAudioDevice(); deviceOwned = false; }
 }
 inline bool Load() {
@@ -26,8 +27,10 @@ inline bool Load() {
     shotLoaded = shot.stream.buffer != nullptr;
     hit = LoadSound("assets/audio/hit.wav");
     hitLoaded = hit.stream.buffer != nullptr;
-    if (!musicLoaded || !shotLoaded || !hitLoaded ||
-        music.frameCount == 0 || shot.frameCount == 0 || hit.frameCount == 0) {
+    hurt = LoadSound("assets/audio/hurt.wav");
+    hurtLoaded = hurt.stream.buffer != nullptr;
+    if (!musicLoaded || !shotLoaded || !hitLoaded || !hurtLoaded ||
+        music.frameCount == 0 || shot.frameCount == 0 || hit.frameCount == 0 || hurt.frameCount == 0) {
         TraceLog(LOG_WARNING, "Game audio unavailable: check assets/audio/*.wav");
         Unload();
         return false;
@@ -36,6 +39,7 @@ inline bool Load() {
     SetMusicVolume(music, 0.30f);
     SetSoundVolume(shot, 0.40f);
     SetSoundVolume(hit, 0.45f);
+    SetSoundVolume(hurt, 0.45f);
     return true;
 }
 inline void Start() { PlayMusicStream(music); }
@@ -44,6 +48,7 @@ inline void Pause() { PauseMusicStream(music); }
 inline void Resume() { ResumeMusicStream(music); }
 inline void Shot() { PlaySound(shot); }
 inline void Hit() { PlaySound(hit); }
+inline void Hurt() { PlaySound(hurt); }
 }
 #endif
 
@@ -74,4 +79,5 @@ inline void UnloadGameAudio() {
 }
 inline void PlayShotSound() { if (GameAudio::ready) AudioBackend::Shot(); }
 inline void PlayHitSound() { if (GameAudio::ready) AudioBackend::Hit(); }
+inline void PlayHurtSound() { if (GameAudio::ready) AudioBackend::Hurt(); }
 #endif

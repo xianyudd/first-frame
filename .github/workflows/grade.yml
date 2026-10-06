@@ -38,20 +38,28 @@ jobs:
           sudo ldconfig
 
       - name: 编译评测程序
+        if: ${{ github.ref_name != 'lesson-4' && github.ref_name != 'my-lesson-4' }}
         run: |
           mkdir -p build
           g++ -std=c++17 tests/test_todos.cpp -o build/test_todos -lraylib -lm
 
       - name: 运行评测
         shell: bash
+        env:
+          REF_NAME: ${{ github.ref_name }}
         run: |
           set +e
-          ./build/test_todos | tee grade_output.txt
-          code=${PIPESTATUS[0]}
-          if [ -f tests/check_visual_todos.py ]; then
-            python3 tests/check_visual_todos.py src/main.cpp | tee -a grade_output.txt
-            visual=${PIPESTATUS[0]}
-            if [ "$visual" -ne 0 ]; then code=1; fi
+          if [[ "$REF_NAME" == 'lesson-4' || "$REF_NAME" == 'my-lesson-4' ]]; then
+            make test RAYLIB_CFLAGS= RAYLIB_LIBS='-lraylib -lm' 2>&1 | tee grade_output.txt
+            code=${PIPESTATUS[0]}
+          else
+            ./build/test_todos | tee grade_output.txt
+            code=${PIPESTATUS[0]}
+            if [ -f tests/check_visual_todos.py ]; then
+              python3 tests/check_visual_todos.py src/main.cpp | tee -a grade_output.txt
+              visual=${PIPESTATUS[0]}
+              if [ "$visual" -ne 0 ]; then code=1; fi
+            fi
           fi
           {
             printf '## 自动评测结果\n\n'
@@ -59,6 +67,9 @@ jobs:
               printf '✅ **自动检查通过**。贴图外观仍请运行 `make run` 亲眼检查。\n'
             else
               printf '❌ **还有未通过项**。看下面的 [FAIL] / [未通过] 行；贴图也请运行 `make run` 检查。\n'
+            fi
+            if [[ "$REF_NAME" == 'lesson-4' || "$REF_NAME" == 'my-lesson-4' ]]; then
+              printf '01–05 为自动组，06 为人工验收；无窗口测试不代表画面与试听验收。\n'
             fi
             printf '\n```\n'
             cat grade_output.txt
@@ -76,7 +87,7 @@ jobs:
           retention-days: 1
 
   publish:
-    if: ${{ always() && github.event_name == 'push' && (github.ref_name == 'my-lesson-1' || github.ref_name == 'my-lesson-2' || github.ref_name == 'my-lesson-3') }}
+    if: ${{ always() && github.event_name == 'push' && (github.ref_name == 'my-lesson-1' || github.ref_name == 'my-lesson-2' || github.ref_name == 'my-lesson-3' || github.ref_name == 'my-lesson-4') }}
     needs: grade
     runs-on: ubuntu-latest
     permissions:
@@ -105,7 +116,7 @@ jobs:
           from pathlib import Path
 
           lesson = int(os.environ['REF_NAME'].removeprefix('my-lesson-'))
-          ids = tuple(range(1, {1: 4, 2: 6, 3: 9}[lesson] + 1))
+          ids = tuple(range(1, {1: 4, 2: 6, 3: 9, 4: 5}[lesson] + 1))
           # Only these L3 groups have prerequisites; task 10 is human review.
           prerequisites = {4: 3, 6: 2, 7: 6} if lesson == 3 else {}
           text = Path('results/grade_output.txt').read_text(encoding='utf-8', errors='replace') if Path('results/grade_output.txt').exists() else ''

@@ -14,7 +14,8 @@
   },
   "method": "Original C-major eight-bar melody over C/Am/F/G/C/Em/F/G; warm additive sine voices, bass, panned chord arpeggios and restrained filtered-noise percussion. Attack/release envelopes, channel DC removal, quiet edge taper and conservative peak normalization. Shoot is a descending oscillator chirp; hit is filtered noise with fixed low resonances.",
   "runtime_requirement": "None: the game loads the shipped WAV files directly.",
-  "reproducibility": "The shipped WAV bytes are identified by SHA-256 below. No generator is required or shipped in the student package.",
+  "regeneration_command": "python3 tools/generate_audio.py",
+  "reproducibility": "Deterministic standard-library Python, explicit seed, little-endian PCM. SHA-256 identifies exact shipped bytes; verify repeated regeneration on the same Python/platform. Floating-point libm differences may alter least-significant PCM bits on another platform.",
   "files": [
     {
       "file": "bgm.wav",
