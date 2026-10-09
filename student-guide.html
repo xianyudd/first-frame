@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="description" content="第4课：血条、保护与受伤反馈、三分钟胜负、击败经验与随机三选一成长；01–05自动评分，06人工实验。">
+<meta name="description" content="第4课：血条、保护与受伤反馈、三分钟胜负、击败经验与随机三选一成长；六章13个TODO分别自动评分，包含可复现数值实验。">
 <title>生存三分钟 · 闯关手册</title>
 <style>
-:root{color-scheme:light;--ground:#F4F6FB;--panel:#FFFFFF;--panel-2:#EEF1F8;--ink:#1B2436;--ink-soft:#536078;--line:#DCE2EE;--accent:#2F6BFF;--accent-ink:#204FCC;--red:#B72E38;--gold:#886000;--disp:"ZCOOL KuaiLe",system-ui,sans-serif;--body:"Noto Sans SC",system-ui,sans-serif;--mono:"JetBrains Mono",ui-monospace,monospace}
-@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark;--ground:#0E1420;--panel:#161F2E;--panel-2:#1E2A3D;--ink:#E7ECF5;--ink-soft:#ADB9CE;--line:#35445E;--accent-ink:#9CBAFF;--red:#FF8A8E;--gold:#FFD16B}}
-:root[data-theme="dark"]{color-scheme:dark;--ground:#0E1420;--panel:#161F2E;--panel-2:#1E2A3D;--ink:#E7ECF5;--ink-soft:#ADB9CE;--line:#35445E;--accent-ink:#9CBAFF;--red:#FF8A8E;--gold:#FFD16B}
+:root{color-scheme:light;--ground:#F4F6FB;--panel:#FFFFFF;--panel-2:#EEF1F8;--ink:#1B2436;--ink-soft:#536078;--line:#DCE2EE;--accent:#2F6BFF;--accent-ink:#204FCC;--red:#B72E38;--green:#187B49;--gold:#886000;--disp:"ZCOOL KuaiLe",system-ui,sans-serif;--body:"Noto Sans SC",system-ui,sans-serif;--mono:"JetBrains Mono",ui-monospace,monospace}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark;--ground:#0E1420;--panel:#161F2E;--panel-2:#1E2A3D;--ink:#E7ECF5;--ink-soft:#ADB9CE;--line:#35445E;--accent-ink:#9CBAFF;--red:#FF8A8E;--green:#78DCAA;--gold:#FFD16B}}
+:root[data-theme="dark"]{color-scheme:dark;--ground:#0E1420;--panel:#161F2E;--panel-2:#1E2A3D;--ink:#E7ECF5;--ink-soft:#ADB9CE;--line:#35445E;--accent-ink:#9CBAFF;--red:#FF8A8E;--green:#78DCAA;--gold:#FFD16B}
 *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:24px}body{margin:0;background:var(--ground);color:var(--ink);font:16px/1.85 var(--body);-webkit-font-smoothing:antialiased}a{color:var(--accent-ink);text-underline-offset:4px}button{font:inherit;cursor:pointer}:focus-visible{outline:3px solid var(--accent-ink);outline-offset:4px;border-radius:4px}.skip-link{position:fixed;top:12px;left:12px;z-index:10;padding:10px 18px;background:var(--panel);border:2px solid;border-radius:10px;transform:translateY(-160%)}.skip-link:focus{transform:translateY(0)}.layout{display:grid;grid-template-columns:250px minmax(0,1fr);max-width:1200px;margin:auto}.layout>nav{position:sticky;top:0;align-self:start;max-height:100vh;overflow:auto;padding:28px 18px;background:var(--panel);border-right:1px solid var(--line)}.layout>nav>strong{font:25px/1.4 var(--disp)}.layout main{min-width:0;padding:32px clamp(20px,4vw,56px) 80px;max-width:880px}h1{font:clamp(34px,4.6vw,52px)/1.3 var(--disp)}h2{font:clamp(25px,3.5vw,30px)/1.4 var(--disp);margin:0 0 16px}h3{font-size:17px;margin:24px 0 10px}p{margin:12px 0}ul,ol{padding-left:24px}li{margin:8px 0}section{padding:36px 0;border-bottom:1px solid var(--line);scroll-margin-top:20px}.links a{display:flex;align-items:center;min-height:44px;padding:8px 10px;border-radius:9px;text-decoration:none;font-size:14px;color:var(--ink)}.links a:hover,.links a[aria-current]{background:var(--panel-2);color:var(--accent-ink)}.muted,footer{color:var(--ink-soft)}code{font-family:var(--mono);font-size:.88em;overflow-wrap:anywhere;background:var(--panel-2);padding:2px 5px;border-radius:5px}pre{background:#111B2C;color:#E7ECF5;padding:18px 20px;border:1px solid var(--line);border-radius:12px;overflow-x:auto;font:13.5px/1.8 var(--mono);tab-size:4}pre code{background:none;color:inherit;padding:0}dl{display:grid;grid-template-columns:6em minmax(0,1fr);gap:12px}dt{font-weight:700}dd{margin:0;min-width:0}details{border:1px solid var(--line);border-radius:12px;margin:18px 0;background:var(--panel)}summary{cursor:pointer;min-height:48px;padding:14px 16px;font-weight:500}details p{padding-inline:16px}.stop,.callout{padding:18px;background:var(--panel-2);border-radius:12px;margin-block:24px}.callout{border-left:3px solid var(--accent)}.callout.warn{border-left-color:var(--red)}.themebtn{min-height:44px;padding:8px 12px;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:10px;font-size:14px}.check{display:flex;align-items:flex-start;gap:12px;margin:12px 0;padding:14px;border:1px solid var(--line);border-radius:12px;background:var(--panel)}.check input{margin-top:8px}.tag{font-size:13px;color:var(--ink-soft)}footer{font-size:13px;margin-top:28px}
 @media(max-width:820px){.layout{display:block}.layout>nav{position:static;max-height:none;border-right:0;border-bottom:1px solid var(--line);padding:22px 16px}.links{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px}.layout main{padding-inline:16px}dl{display:block}dd{margin-block:8px 20px}}
 @media(max-width:540px){body{font-size:15px}pre{padding:14px;font-size:13px}}
@@ -18,110 +18,119 @@
 <body>
 <a class="skip-link" href="#content">跳到正文</a>
 <div class="layout">
-<nav aria-label="任务导航"><strong>生存三分钟</strong><p class="tag"><a href="https://xianyudd.github.io/first-frame/">← 课程主页</a> · 第 4 课</p><p><a href="https://xianyudd.github.io/first-frame/lesson-3/">回顾第 3 课</a> · <a href="https://xianyudd.github.io/first-frame/git/">Git 手册</a></p>
-<div class="links"><a href="#start">开始前：最短读法</a><a href="#task-01">01 会缩短的血条</a><a href="#task-02">02 保护与受伤反馈</a><a href="#task-03">03 三分钟胜负</a><a href="#task-04">04 击败、XP与等级</a><a href="#task-05">05 三选一成长</a><a href="#task-06">06 单数值实验</a><a href="#homework">课后：二选一</a><a href="#checklist">总清单与排错</a></div>
+<nav aria-label="任务导航"><strong>生存三分钟</strong><p class="tag"><a href="../game/docs/">← 课程主页</a> · 第 4 课</p><p><a href="../game/docs/lesson-3/">回顾第 3 课</a> · <a href="../game/docs/git/">Git 手册</a></p>
+<div class="links"><a href="#start">开始前：最短读法</a><a href="#task-01">01 会缩短的血条</a><a href="#task-02">02 保护与受伤反馈</a><a href="#task-03">03 三分钟胜负</a><a href="#task-04">04 击败、XP与等级</a><a href="#task-05">05 三选一成长</a><a href="#task-06">06 单数值实验</a><a href="#homework">课后：二选一</a></div>
 <button class="themebtn" id="theme" type="button">主题：跟随系统</button><p class="tag">按六项任务分段阅读，完成后演示与解释。</p></nav>
 <main id="content" tabindex="-1">
 <header><p class="muted">第 4 课 · 血量 → 胜负 → 经验 → 三选一成长</p><h1>生存三分钟</h1><p>怪物贴身时，血条告诉你还剩多少机会；击败怪物后，选择一次成长。每次只改一小处，先预测，再运行，最后解释为什么。</p></header>
 <section id="start"><h2>开始前：只读眼前需要的文件</h2>
-<div class="callout"><strong>这份课包包含学生起点与评分器。</strong>六项任务、13个定位标记；01–05自动评分，06单数值实验由老师人工验收。起点保留待实现部分，能编译运行不代表已经完成；声音试听与自然三分钟试玩仍要现场检查。</div>
-<p><strong>最短路先看 29 行的 <code>src/main.cpp</code>。</strong>开窗口、加载资源、<code>InitGame()</code>；循环读按键和一份 <code>GetFrameTime()</code> → <code>UpdateGame(dt)</code> → 镜头、音乐、绘制；退出释放资源。今天不改这条主线。</p>
-<p>接着在 <code>src/game.h</code> 只找当前任务的数据和函数声明。<code>extern Player player;</code> 是「同一份数据的名字」，不新建玩家；<code>src/game.cpp</code> 唯一定义数据并处理规则；<code>src/drawing.cpp</code> 只读数据画画。地图、镜头、对象池、<code>assets.h</code> 与 <code>audio.h</code> 由老师提供，不必通读。</p>
-<p><code>Player</code> 的 <code>rect</code> 是身体，<code>speed</code> 是每帧移动量；<code>hp/maxHp/attack/xp/level</code> 是整数；<code>invulnerability</code>、<code>shotInterval</code> 是浮点秒数。<code>Bullet</code> 有 <code>rect/vx/vy/active/damage</code>；<code>Enemy</code> 有 <code>rect/kind/hp/active</code>。其中rect是 <code>Rectangle</code>，speed/vx/vy是float，active是bool，damage和怪物hp是int。全局 <code>survivalTime/shotCooldown</code> 是float秒数，<code>kills</code> 是int；<code>upgradeChoices</code> 是三项UpgradeKind数组。弹怪仍按帧移动，只有计时使用秒，别给旧速度再乘 dt。</p>
-<p><code>InitGame</code> 已给初态：HP/maxHP=100/100、attack=1、shotInterval=0.3 秒、level=1、xp=0、保护和冷却=0；<code>survivalTime</code>、<code>kills</code>、score=0，弹怪全空。<code>GameState</code> 有 <code>Playing/ChoosingUpgrade/Won/Lost</code> 四种值，用 <code>GameState::Playing</code> 写出类型所属的值。</p>
-<pre tabindex="0" role="region" aria-label="课包目录内的命令">make todo
-make run
-make test
-make test VERBOSE=1</pre>
-<p>在 MSYS2 UCRT64 的课包目录执行。<code>make todo</code> 列出下面13个真实标记；复制标记到指定文件 Ctrl+F，不靠固定行号。01–05有自动检查：起点尚未实现应红，默认看英文失败明细与组摘要，<code>VERBOSE=1</code> 详细模式列每条PASS/FAIL，失败含定位与预期/实际。课包应有 <code>tests/test_todos.cpp</code>、<code>tests/test_support.h</code> 和 <code>tests/fake.cpp</code>；若缺文件，确认取得的是完整lesson-4起点，不删目标假通过；06不算自动成绩。</p>
-<details><summary>受控实验放哪里、怎样撤销？</summary><p>先备份；仅在 main 开头那次 <code>InitGame();</code> 之后、<code>while</code> 之前插入一个临时块，不放进循环。每次从以下完整初态开始，再接本任务的小片段。只测试一个场景，不按移动/射击/Enter/TAB，除非实验要求；做完删除整个临时块，重新编译，Enter核对恢复。实验调用不是函数答案。</p><pre tabindex="0" role="region" aria-label="所有局部实验的公共初态"><code>{
+<div class="callout"><strong>六章，13个TODO分别评分。</strong>每个定位标记都有自己的自动结果，06也会真实运行数值实验。学生起点保留待实现部分，能编译运行不代表已经完成；画面、声音、自然三分钟体验和解释质量仍要现场检查。</div>
+<p class="callout warn"><strong>版本提醒：</strong>本稿对应尚未公开的本地v2课包，本轮先使用老师提供的新版；公开lesson-4分支与网页成绩待发布确认。旧五组课包不含下面的实验规格，不能混用。</p>
+<p>新版发布确认后，从老师公开库的 <a href="https://github.com/xianyudd/first-frame/tree/lesson-4" target="_blank" rel="noopener">lesson-4 分支取得课包</a>。已有自己的复刻和upstream时，先保存当前课的改动、用 <code>git status</code> 确认状态，再按 <a href="https://xianyudd.github.io/first-frame/git/#start">Git手册的取课流程</a> 新建自己的练习分支：</p>
+<pre tabindex="0" role="region" aria-label="第4课取课命令">git fetch upstream
+git switch -c my-lesson-4 --no-track upstream/lesson-4</pre>
+<p>已建过my-lesson-4就不再用 <code>-c</code>，先查看自己的分支再继续。origin是你的复刻，upstream是老师库；只在自己的练习分支修改，不覆盖上一课。只想先离线读课包，可在lesson-4分支页面点Code → Download ZIP并解压，自动提交评测仍按Git手册走复刻流程；不要用main分支的ZIP代替本课起点。</p>
+<p><strong>取课后先启动一次。</strong>在 MSYS2 UCRT64 的课包目录执行：</p>
+<pre tabindex="0" role="region" aria-label="首次启动课包">make run</pre>
+<p>能打开窗口只是能启动的未完成起点，不代表六项任务已完成。关闭窗口后，直接到 <a href="#task-01">01定位血条函数</a>，先画固定100像素的绿色条；现在不用执行其他命令或通读字段。</p>
+</section>
+<section id="task-01"><h2>01 · 画会缩短的血条</h2>
+<p id="todo-L4-01"><code>src/drawing.cpp → DrawHealthBar → TODO(L4-01)</code></p>
+<p>在指定文件 Ctrl+F 搜上面的标记，不靠固定行号。需要列出13个位置时才运行 <code>make todo</code>。先读helper旁边几行，找「输入什么、修改什么、返回什么」；留白里的 <code>(void)dt</code> 或 <code>(void)index</code> 只是避免未使用参数警告，写逻辑时可移除。</p>
+<p>本项只用 <code>player.hp/maxHp</code> 两个int字段：当前血量与血量上限。<code>drawing.cpp</code> 只读数据画画，别在绘制里改HP。</p>
+<details><summary>定位时再看：短main与文件职责</summary><p>29行的 <code>src/main.cpp</code> 负责开窗口、加载资源、<code>InitGame()</code>；循环读按键和一份 <code>GetFrameTime()</code> → <code>UpdateGame(dt)</code> → 镜头、音乐、绘制；退出释放资源。今天不改这条主线。</p><p><code>src/game.h</code> 给当前任务的数据和函数声明；声明末尾的分号告诉你怎样调用，带花括号的定义才执行工作。<code>extern Player player;</code> 是同一份数据的名字，不新建玩家；<code>src/game.cpp</code> 唯一定义数据并处理规则，不要在头文件再定义一份player，也不用新建类。地图、镜头、对象池、<code>assets.h</code> 与 <code>audio.h</code> 由老师提供，不必通读。</p></details>
+<p>先读 <code>DrawHealthBar</code> 中已有的一行：<code>DrawRectangle(16, 66, 200, 16, GRAY)</code>。五个参数依次是左上角x、y、宽、高、颜色，单位是屏幕像素。它先画灰背景；在紧接的 <code>TODO(L4-01)</code> 后新增绿色前景，不删灰底，后画的绿色才盖住背景。沿 <code>DrawGame → DrawHUD → DrawHealthBar</code> 这条短路线理解：main每帧调用DrawGame，所以HUD每帧重新读取血量，不需要自己加绘制循环或先跳遍文件。</p>
+<ol><li>先只写同位置、同高度、宽100的 <code>DrawRectangle(x, y, width, height, GREEN)</code> 调用，<code>make run</code> 看是否覆盖半条灰底。</li><li>再在前景调用前保存局部float比例。先判断maxHp是否大于0：否则比例取0；只有分母有效才用 <code>static_cast&lt;float&gt;(player.hp) / player.maxHp</code>，避免整数 <code>50/100</code> 得0或先做除零。</li><li>把比例夹在0..1，先用纸上25/100、负血、超上限推值；再把200乘比例转换成int宽度，最后用这个宽度替换固定100。每次只接一步，后面的半血与边界实验看绿色条是否符合预测；绘制不修改HP。</li></ol>
+<details><summary>卡住时，只做下一小步</summary><p>先纸上写「血量 → 比例 → 像素」三列，再在函数里保存局部比例。把小于零、大于一的情况分别处理，最后才转换像素。比如25/100应是0.25、50像素；1/3乘200约66.67，转成整数是66，不四舍五入。若颜色盖住文字，先核对调用位置；这个函数已在HUD背景之后调用，不要搬到世界绘制里面。</p></details>
+<div id="experiment-state" class="callout"><strong>第一次受控实验：先读公共初态与撤销方法。</strong><p>先备份；只在main开头那次 <code>InitGame();</code> 之后、<code>while</code> 之前插入以下临时块，不放进循环。每次从这份完整初态重开，再在注释处接一个任务的片段；不按移动/射击/Enter/TAB，除非实验要求。</p><pre tabindex="0" role="region" aria-label="所有局部实验的公共初态"><code>{
     practiceMode = true;
     debugMode = false;
     InitGame();
     // 这里只接一个任务的实验片段。
-}</code></pre><p>这会保留合法出生位置、100血、Playing、零经验/计时和空弹怪。若要战斗场景，在片段里明确改 <code>practiceMode=false</code>；<code>InitGame</code> 保留模式。读完本项再打开此处，不用先理解初始化内部。</p></details>
-<p>每项的读法相同：先看目标和标记，再读helper旁边几行，找到「输入什么、修改什么、返回什么」。声明末尾的分号只告诉你能怎样调用；带花括号的定义才执行工作。不要在头文件再定义一份player，也不用新建类。留白里的 <code>(void)dt</code> 或 <code>(void)index</code> 只是避免未使用参数警告，写逻辑时可移除。</p>
-<p>本页说「看01组」是运行同一个 <code>make test</code> 后找01的结果，不是另有分组make目标。组编号对应 <code>TODO_STATUS</code>；详细模式便于定位第一条失败。局部检查与整帧检查都要读，后者可能同时依赖多项尚未完成的任务，不能因为别组仍红就把刚写的局部函数全部推倒。</p>
-</section>
-<section id="task-01"><h2>01 · 画会缩短的血条</h2>
-<p id="todo-L4-01"><code>src/drawing.cpp → DrawHealthBar → TODO(L4-01)</code></p>
-<p>老师已画灰底 <code>DrawRectangle(16, 66, 200, 16, GRAY)</code>。你补同位置、同高度的绿色前景：<code>DrawRectangle(x, y, width, height, GREEN)</code>，宽度取整数像素。先试固定宽100，确认出现，再接血量比例。</p>
-<p>整数 <code>50/100</code> 为0；局部比例可写 <code>static_cast&lt;float&gt;(player.hp) / player.maxHp</code>。分母≤0时比例取0，否则把比例夹在0..1，宽度是200乘比例后转 <code>int</code>。绘制不修改HP，也不用改老师提供的 <code>InitGame</code>。</p>
-<details><summary>卡住时，只做下一小步</summary><p>先纸上写「血量 → 比例 → 像素」三列，再在函数里保存局部比例。把小于零、大于一的情况分别处理，最后才转换像素。比如25/100应是0.25、50像素；1/3乘200约66.67，转成整数是66，不四舍五入。若颜色盖住文字，先核对调用位置；这个函数已在HUD背景之后调用，不要搬到世界绘制里面。</p></details>
-<p><strong>先算再看：</strong>公共初态后只设 <code>player.hp=50;</code>，应半条100像素；再分别试100、0、负数与超过maxHp，应该满/空/空/满，maxHp=0也应安全空条。每次只改这个实验值。走远后HUD仍固定；若半血空了，先查除法，别改镜头。跑01组，再撤销临时设置。</p>
+}</code></pre><p><code>InitGame</code> 保留模式，并给合法出生位置、Playing、HP/maxHP=100/100、attack=1、shotInterval=0.3秒、level=1、xp=0、保护/冷却/生存计时/kills/score=0、空弹怪。战斗实验须在片段里明确设 <code>practiceMode=false</code>。做完删除整个临时块，重新 <code>make run</code>，Enter核对恢复；实验调用不是函数答案。</p></div>
+<p><strong>先算再看：</strong>公共初态后只设 <code>player.hp=50;</code>，应半条100像素；再分别试100、0、负数与超过maxHp，应该满/空/空/满，maxHp=0也应安全空条。每次只改这个实验值。走远后HUD仍固定；若半血空了，先查除法，别改镜头。看L4-01结果，再撤销临时设置。</p>
+<details id="test-reading"><summary>第一次跑01时读：评分命令与红色结果</summary><p>运行 <code>make test</code> 后找 <code>L4-01</code>；13个标记共用此命令，没有另一个分组目标。报告以 <code>TODO_PROTOCOL L4-v2</code> 开头，<code>TODO_STATUS id passed total</code> 的数字依次对应01、02-A/B/C、03-A/B、04-A/B、05-A/B/C/D、06。起点尚未实现应红；需逐条定位再运行 <code>make test VERBOSE=1</code>，读取PASS/FAIL、定位、预期与实际。终端保持ASCII英文，避免乱码。</p><p><code>TODO_BLOCKED</code> 表示必要前置未完成，检查尚未执行，不是通过，也不是本项已经被证实写错。05-A需要04-B的升级成功路径，06需要05-B的升级效果；其他局部检查尽量直接设置初态。<code>INTEGRATION_STATUS</code> 单独检查整帧联动，不重复计入13项；它仍红时先看涉及的后续任务，不推倒已通过的局部函数。全部13项及整帧都通过才算自动检查完成。</p><p>课包应有 <code>tests/test_todos.cpp</code>、<code>tests/test_support.h</code>、<code>tests/fake.cpp</code>；缺文件先确认完整起点，不删目标假通过。旧课包只有五组结果，不能直接当成这13项；先保存自己的工作，请老师协助合入新版评分器、参数入口、工作流及 <code>.github/scripts/publish_todo_statuses.py</code> 发布模块，不用重建或覆盖已有练习分支。</p></details>
+<details><summary>后续任务按需查：字段类型、状态与单位</summary><p><code>Player.rect</code> 是Rectangle身体，<code>speed</code> 是float每帧移动量；<code>hp/maxHp/attack/xp/level</code> 是int，<code>invulnerability/shotInterval</code> 是float秒数。<code>Bullet</code> 的 <code>rect/vx/vy/active/damage</code> 分别为Rectangle、float、float、bool、int；<code>Enemy</code> 的 <code>rect/kind/hp/active</code> 分别为Rectangle、EnemyKind、int、bool。<code>survivalTime/shotCooldown</code> 是float秒数，<code>kills</code> 是int，<code>upgradeChoices</code> 是三项UpgradeKind数组。弹怪仍按帧移动，只有计时用秒，别给旧速度再乘dt。</p><p><code>GameState</code> 有 <code>Playing/ChoosingUpgrade/Won/Lost</code> 四值；用 <code>GameState::Playing</code> 写类型所属的值。</p></details>
 </section>
 <section id="task-02"><h2>02 · 保护、闪烁与受伤声</h2>
 <p id="todo-L4-02-A"><code>src/game.cpp → UpdateProtection(float dt) → TODO(L4-02-A)</code></p>
 <p id="todo-L4-02-B"><code>src/game.cpp → TakeContactDamage() → TODO(L4-02-B)</code></p>
 <p id="todo-L4-02-C"><code>src/drawing.cpp → PlayerVisible() → TODO(L4-02-C)</code></p>
-<ol><li>先做倒计时：<code>player.invulnerability</code> 减dt一次，最低0；公共初态后先一次设 <code>player.invulnerability=0.8f;</code>，再依次调用 <code>UpdateProtection(0.3f)</code>、<code>UpdateProtection(0.6f)</code>，预期约0.5→0。</li><li>再做有效接触：未保护才扣10HP，最低0，立即设置 <code>INVUL_SECONDS=0.8f</code> 并调用现成 <code>PlayHurtSound()</code>。血量归零立刻设Lost；保护中不扣、不响。接触怪物仍活着。</li><li>最后只控制图像：无保护始终可见；保护时用 <code>static_cast&lt;int&gt;(player.invulnerability * 10) % 2</code>，结果为0显示、1隐藏。<code>PlayerVisible</code> 返回bool；G身体框仍显示，碰撞身体不消失。</li></ol>
+<p>本项 <code>player.invulnerability</code> 和参数dt都是float秒数；只减计时，不给仍按帧的移动速度乘dt。</p>
+<p><strong>先带着问题读三处已有语句：</strong>main中 <code>float dt = GetFrameTime(); UpdateGame(dt);</code> 取得这一帧秒数并传下去；game.cpp的UpdateGame中 <code>UpdateProtection(dt)</code> 每正常帧只调用一次，随后才 <code>UpdateEnemies(dt)</code>；UpdateEnemies只看 <code>if (CheckCollisionRecs(enemies[i].rect, player.rect))</code> 内的 <code>TakeContactDamage();</code>，即每只活动怪确认碰撞后才调用。传dt、循环怪物和碰撞调用都已给，不在TODO里再写一遍。</p>
+<p>先手推0.8减0.3得0.5，再减0.6得负数，所以需要夹到0。把「剩余值减本帧秒数，再写回」落成一条局部赋值 <code>player.invulnerability = player.invulnerability - dt;</code>，随后自己补小于0的处理；不要只计算临时结果却忘记写回。接触函数先确认 <code>gameState==GameState::Playing</code>，其他状态提前return；再读保护，受保护也提前return；通过后再组织扣血夹零→立即写保护/播放受伤声→判断致死状态。下面两怪实验中，第一只把共享保护从0写成0.8，第二次调用读的就是这个新值，因此在你写的提前退出处停止，不再扣血；不是每怪各有一份玩家保护。</p>
+<ol><li>先做倒计时：<code>player.invulnerability</code> 减dt一次，最低0；公共初态后先一次设 <code>player.invulnerability=0.8f;</code>，再依次调用 <code>UpdateProtection(0.3f)</code>、<code>UpdateProtection(0.6f)</code>，预期约0.5→0。</li><li>再做有效接触：Playing且未保护才扣10HP，最低0，立即设置 <code>INVUL_SECONDS=0.8f</code> 并调用现成 <code>PlayHurtSound()</code>。血量归零立刻设Lost；保护中不扣、不响。接触怪物仍活着。</li><li>最后只控制图像：无保护始终可见；保护时用 <code>static_cast&lt;int&gt;(player.invulnerability * 10) % 2</code>，结果为0显示、1隐藏。<code>PlayerVisible</code> 返回bool；G身体框仍显示，碰撞身体不消失。</li></ol>
 <p>只往公共初态接这两只合法普通怪，先预测首帧90还是80，再观察HP和闪烁：</p>
 <pre tabindex="0" role="region" aria-label="同帧两怪的局部实验"><code>enemies[0] = {player.rect, EnemyKind::Grunt, 1, true};
 enemies[1] = {player.rect, EnemyKind::Grunt, 1, true};</code></pre>
-<p>首次接触应90，两怪都还在；约0.8秒后仍接触才再伤。02组核对次数，现场试听受伤声一次；子弹命中仍是 <code>PlayHitSound</code>，别混用。短调用实验里 <code>TakeContactDamage()</code> 表示一次已经确认的接触事件，它本身不搜索怪物。计时helper可直接单测；暂停由整帧入口管理，不给每个helper重复加状态门。</p>
-<p>闪烁可先不用怪物：公共初态设保护0.35秒，第一次可见判断的整数段是3；换成0.25秒，段是2，图像状态应相反。自然帧会继续减保护，所以观察的是一段交替过程，不是要求某个小数永久停住。两怪实验先查HP，再查图像，最后试听，一次只排一个问题。</p>
+<p>首次接触应90，两怪都还在；约0.8秒后仍接触才再伤。02-B的局部检查与独立整帧回归核对次数，现场试听受伤声一次；子弹命中仍是 <code>PlayHitSound</code>，别混用。短调用实验里 <code>TakeContactDamage()</code> 表示一次已经确认的接触事件，它本身不搜索怪物。计时helper可直接单测；整帧暂停由UpdateGame管理，不给所有计时helper重复加门；但TakeContactDamage自身只接受Playing中的接触事件，这个状态前提仍须检查。</p>
+<p><strong>再读返回值怎样接到画面：</strong>PlayerVisible起点只有固定 <code>return true;</code>；DrawGame已有 <code>if (PlayerVisible()) DrawSprite(SpriteId::Player, player.rect);</code>。true才画角色，false只跳过这一行，身体数据和碰撞不动。可以在这个TODO内暂把固定返回改成 <code>return false;</code>，运行看图像消失，再恢复；这不是最终规则。最终用「无保护返回true；有保护返回余数是否等于0的比较结果」两条路径替换固定返回，保留前面的秒数乘10取整数再模2公式：余数0→比较为true→绘制，余数1→比较为false→跳过绘制。不要直接返回 <code>% 2</code> 的整数结果，因为0转false、非0转true，会把显示规则反过来。不要在判断前留一个永远先执行的return，否则后面的逻辑走不到。</p>
+<p>闪烁可先不用怪物：公共初态设保护0.35秒，第一次可见判断的整数段是3、余数1，返回false，图像隐藏；换成0.25秒，整数段2、余数0，返回true，图像显示。自然帧会继续减保护，所以观察的是一段交替过程，不是要求某个小数永久停住。两怪实验先查HP，再查图像，最后试听，一次只排一个问题。</p>
 <details><summary>为什么一帧两怪也只伤一次？</summary><p>第一只有效接触立即写入保护，第二只读到新值便跳过。若等循环结束才保护，两只会各扣10。计时只在整帧入口减一次，不能每遇到一怪减一次。</p></details>
 </section>
 <section id="task-03"><h2>03 · 撑满三分钟，结算这一局</h2>
 <p id="todo-L4-03-A"><code>src/game.cpp → UpdateSurvival(float dt) → TODO(L4-03-A)</code></p>
 <p id="todo-L4-03-B"><code>src/game.cpp → CheckWin() → TODO(L4-03-B)</code></p>
-<p>战斗模式才累计 <code>survivalTime</code> 秒，封顶 <code>SURVIVAL_SECONDS=180</code>；仍Playing且战斗到时才Won，不能覆盖Lost。练习不生存计时、不自然刷怪，但人工怪物、接触和XP测试有效。死亡在02完成，结算画面由 <code>DrawResult</code> 提供，显示时间、kills、level和score。</p>
+<p><code>survivalTime</code> 是float秒数。战斗模式才累计 <code>survivalTime</code> 秒，封顶 <code>SURVIVAL_SECONDS=180</code>；仍Playing且战斗到时才Won，不能覆盖Lost。练习不生存计时、不自然刷怪，但人工怪物、接触和XP测试有效。死亡在02完成，结算画面由 <code>DrawResult</code> 提供，显示时间、kills、level和score。</p>
 <p>只读 <code>game.cpp</code> 末尾 <code>UpdateGame(float dt)</code>：它是真暂停/终局的整帧入口。Lost/Won整帧返回；正常帧计时→运动/射击→接触，死亡立即停止；之后命中→胜利→升级。负dt先夹0。测试整帧必须调用它，不能直接调低层函数后声称「暂停失效」。</p>
+<p>读末尾门的先后：<code>UpdateEnemies(dt)</code> 可能写Lost，紧接的 <code>if (gameState == GameState::Lost) return;</code> 已拦住致死帧；之后是 <code>HandleHits(); CheckWin();</code>，最后只有Playing才 <code>BeginUpgrade()</code>。这些调用与门由老师提供，不重复添加。由此推导本项职责：UpdateSurvival判断战斗并更新秒数；CheckWin核状态、模式与时间，只负责成立时写Won；不能把任何到时状态都改成Won。先圈条件再写更新，把死亡优先留在现有顺序中。</p>
 <p><strong>不用先等三分钟：</strong>公共初态接 <code>practiceMode=false; survivalTime=179.99f; UpdateGame(0.02f);</code>，无怪应Won且时间180。另一次加 <code>player.hp=10;</code> 和02的第一只重叠怪，再调这一帧，应Lost而非Won。然后用练习初态只调 <code>UpdateGame(181.0f)</code>，时间仍0。自然帧恢复后再演示三分钟。</p>
 <p><code>GameEnded()</code> 由老师提供，仅Won或Lost返回true；ChoosingUpgrade不是结束。因此main传给音乐的是这个bool，选择时音乐继续，终局才暂停。不要把「不是Playing」直接当结束，否则选成长时就误停音乐。相机与绘制仍被main调用，这是继续展示冻结的一局，不是继续推进模拟。</p>
-<p>终局等待数据不变。Enter全重置但保留当前模式/调试；TAB切模式并全重置；G仅视觉。检查HP100、经验0、等级1、攻击1、间隔0.3、保护/冷却/计时/kills/score=0、旧弹怪清空、候选重置、镜头回出生点；音乐随重开恢复。跑03组。</p>
+<p>终局等待数据不变。Enter全重置但保留当前模式/调试；TAB切模式并全重置；G仅视觉。检查HP100、经验0、等级1、攻击1、间隔0.3、保护/冷却/计时/kills/score=0、旧弹怪清空、候选重置、镜头回出生点；音乐随重开恢复。查看03-A/B与独立整帧结果。</p>
 </section>
 <section id="task-04"><h2>04 · 击败怪物才获得经验</h2>
 <p id="todo-L4-04-A"><code>src/game.cpp → RewardKill(EnemyKind kind) → TODO(L4-04-A)</code></p>
 <p id="todo-L4-04-B"><code>src/game.cpp → BeginUpgrade() → TODO(L4-04-B)</code></p>
-<p>先只读 <code>HandleHits</code> 的死亡小分支：实际击败才调用 <code>RewardKill</code>。每只 <code>kills+1</code>、<code>player.xp+10</code>；kind不改变经验，原score仍按配置算。三血重甲前两次命中没有击败，第三次才给经验，接触也不给。</p>
+<p><code>kills/player.xp/player.level/player.attack</code> 都是int。先只读 <code>HandleHits</code> 的死亡小分支：实际击败才调用 <code>RewardKill</code>。每只 <code>kills+1</code>、<code>player.xp+10</code>；kind不改变经验，原score仍按配置算。三血重甲前两次命中没有击败，第三次才给经验，接触也不给。</p>
 <p><code>ExperienceNeeded()</code> 老师已提供，固定返回100。你先在 <code>BeginUpgrade</code> 检查Playing、level&lt;6、xp≥100，成立才扣100并升一级，保留余量；这里只做04那一处，抽取和暂停留给05。等级初始1，最多6，满级继续攒XP但不弹。</p>
+<p>在HandleHits只圈 <code>if (enemies[j].hp &lt;= 0)</code> 及里面的 <code>RewardKill(enemies[j].kind)</code>：死亡条件成立才进入。里面已有退出活动和 <code>score += ConfigOf(enemies[j].kind).score;</code>，RewardKill只补击败数与XP，不重复score、不再扣怪物血。</p>
+<p>BeginUpgrade中04-B和05-A是同一条成功路径的前后两步。先把「非Playing、等级已满、经验不足」各自转为失败便退出整个函数的条件；不能仅跳过04的扣经验，却让后面05无条件执行。通过后才扣100、升一级；05时在这条成功路径后接抽候选→设ChoosingUpgrade。04先完成条件与扣升，暂不实现05，不挪走两处TODO。</p>
 <p>这里先分清三种数字：命中是子弹确实扣到怪物HP；击败是怪物HP降到零后退出活动；score是按种类给的分数。只有后两者中的击败数量决定固定经验。读死亡分支时圈出调用，不把奖励挪到循环外；循环外既不知道这次是否死亡，也可能一次处理多只。奖励函数不用再扣怪物HP。</p>
-<p>预测表自己填：xp=99/100/235、level=1，调用一次 <code>BeginUpgrade()</code> 后应分别为99/1、0/2、135/2（XP/等级）。公共初态改一个xp值再调；04尚无暂停时不放任多帧运行，用04组看单次结果。满级6、xp100应不扣不升。实际击败再用战斗验证；别为了变绿给「每次命中」加奖励。</p>
+<p>预测表自己填：xp=99/100/235、level=1，调用一次 <code>BeginUpgrade()</code> 后应分别为99/1、0/2、135/2（XP/等级）。公共初态改一个xp值再调；04尚无暂停时不放任多帧运行，用04-B结果看单次扣经验/升级。满级6、xp100应不扣不升。实际击败再用战斗验证；别为了变绿给「每次命中」加奖励。</p>
 </section>
 <section id="task-05"><h2>05 · 三选一：分三次停下来</h2>
 <p id="todo-L4-05-A"><code>src/game.cpp → BeginUpgrade() → TODO(L4-05-A)</code></p>
 <p id="todo-L4-05-B"><code>src/game.cpp → ApplyUpgrade(int index) → TODO(L4-05-B)</code></p>
 <h3>第一小段 · 先出现选择，再恢复</h3>
 <p><code>UpgradeKind</code> 四值是 <code>Attack/FireRate/MaxHp/Heal</code>。老师的 <code>FillUpgradeChoices(UpgradeKind out[3])</code> 已从四种打乱取三个不同值；04升级成立之后，你调用它填写 <code>upgradeChoices</code>，进入ChoosingUpgrade。面板和1/2/3按键老师已接好，传入 <code>ApplyUpgrade</code> 的index是0/1/2。</p>
-<p>这一小段先只做合法选择与恢复，不急着填四种效果：只接受ChoosingUpgrade中的0..2，完成一次便回Playing，非法索引或其他状态不改数据。公共初态接 <code>player.xp=100; BeginUpgrade();</code>：面板出现、等级2、xp0。先等、按W和箭头，生存/保护/冷却、角色/弹/怪、刷怪都冻结；UI与音乐继续。按一个数字后下一帧才恢复运动。<strong>停下来演示暂停和恢复，再往下写。</strong></p>
-<details><summary>想看见「倒计时也暂停」，怎样给初态？</summary><p>在公共初态之后、触发升级之前，再设保护0.5秒、冷却0.2秒，并放一颗待飞行旧弹和一只远处普通怪。空地图附近的合法位置如下；这些都是测试对象，不是让你改刷怪逻辑。</p><pre tabindex="0" role="region" aria-label="观察选择冻结的局部对象"><code>player.invulnerability = 0.5f;
+<p>先就近读UpdateGame的ChoosingUpgrade分支：已有1/2/3调用ApplyUpgrade后无条件return，整帧不会走到计时、移动或末尾升级；末尾又只有Playing才BeginUpgrade。暂停门和选择当帧返回已提供，不在helper里复制。回到BeginUpgrade确认04任何条件失败都会退出整个函数，05抽候选与改状态只能接在成功扣XP/升等级之后。</p>
+<p id="upgrade-pause">这一小段先只做合法选择与恢复，不急着填四种效果：只接受ChoosingUpgrade中的0..2，完成一次便回Playing，非法索引或其他状态不改数据。<strong>游戏规则是选择期间暂停所有模拟，UI与音乐继续；现场只观察下面初态能看见的项目。</strong></p>
+<p>先按 <a href="#experiment-state">公共合法初态</a> 重开，再在触发升级之前接下面整个片段：保护0.5秒、冷却0.2秒、一颗待飞行旧弹和一只远处普通怪。练习模式不自然刷怪，避免自然怪干扰；这两个人工对象仍有效。默认镜头下y=560的两个对象在面板底边540与底HUD顶边646之间，且不碰现有墙，便于看见位置。<code>invulnerability/shotCooldown</code> 都是float秒数，旧弹的vx=9是每帧位移，damage=1是int快照；位置和活动标记按Bullet/Enemy现有字段顺序填写，不改刷怪逻辑。</p>
+<pre tabindex="0" role="region" aria-label="观察选择冻结的局部对象"><code>player.invulnerability = 0.5f;
 shotCooldown = 0.2f;
-bullets[0] = {{700, 400, 10, 10}, 9, 0, true, 1};
-enemies[0] = {{900, 400, 40, 40}, EnemyKind::Grunt, 1, true};
+bullets[0] = {{700, 560, 10, 10}, 9, 0, true, 1};
+enemies[0] = {{900, 560, 40, 40}, EnemyKind::Grunt, 1, true};
 player.xp = 100;
-BeginUpgrade();</code></pre><p>选择时怪的位置、保护闪烁阶段都应固定。选择后下一帧，旧弹飞行、怪重新追来、闪烁阶段继续变化；保护和冷却不能在你犹豫时耗光。先只做恢复时四种效果还没写，数值不增长是这一停止点允许的暂态，05自动全绿要等三段都完成。</p></details>
+BeginUpgrade();</code></pre>
+<p>面板出现、等级2、xp0。先等，再按W和箭头，肉眼只看旧弹与人工怪的位置停住；按一个数字的选择帧仍不运动，下一帧旧弹飞行、怪重新追来。角色与保护闪烁被面板遮住，不作为现场观察项；练习时间原本为0、不自然刷怪，也不能据此证明暂停。角色、保护、生存计时、冷却及自然刷怪的暂停交 <a href="#test-reading">独立整帧检查</a>；保留非零保护与冷却作为整帧检查条件，自动验证不等于肉眼现场验证。先只做恢复时四效果还没写，数值不增长是允许的暂态，05的四个标记全通过要等三段完成。<strong>停下来演示这两个可见对象的暂停和恢复，再往下写。</strong></p>
 <h3>第二小段 · 一次只写一种效果</h3>
-<p>读取 <code>upgradeChoices[index]</code>，用已学的switch/分支完成下列规则，再测试下一种。不要把索引误当选项类型，随机后「1」不总是攻击。</p>
-<ul><li>Attack：<code>player.attack</code> 加1。</li><li>FireRate：<code>player.shotInterval</code> 乘0.8，最低 <code>MIN_SHOT_INTERVAL=0.12</code> 秒。</li><li>MaxHp：maxHp加20，hp也加20并夹上限，保留缺血量；70/100变90/120。</li><li>Heal：hp加30夹到maxHp；90/100变100/100，不加上限。</li></ul>
-<p>公共初态后设 <code>player.hp=70; gameState=GameState::ChoosingUpgrade; upgradeChoices[0]=UpgradeKind::MaxHp; ApplyUpgrade(0);</code>，应90/120与Playing。替换选项/血量逐个预测；再调一次不应再加。测试xp235：第一次选择后余135，选择那帧始终返回，下一帧才再扣100、升一级、弹下一次，不能一键连选；满级不再弹。<strong>停下来解释两种回血的区别与余量。</strong></p>
+<p><code>upgradeChoices</code> 是三项UpgradeKind数组。先验证状态是ChoosingUpgrade且index在0..2，不成立就退出；<strong>验证通过后才读取</strong> <code>upgradeChoices[index]</code>，否则可能越界。给每种效果自行列「读哪些字段、写哪些字段、哪里夹上限」，再用已学的switch/分支组织，效果应用完才回Playing。不要把索引误当选项类型，随机后「1」不总是攻击。</p>
+<ul><li>Attack：<code>player.attack</code> 加1。</li><li>FireRate：<code>player.shotInterval</code> 乘 <code>GetUpgradeParameters().fireRateMultiplier</code>（默认0.8），最低 <code>MIN_SHOT_INTERVAL=0.12</code> 秒。</li><li>MaxHp：maxHp加20，hp也加20并夹上限，保留缺血量；70/100变90/120。</li><li>Heal：hp加 <code>GetUpgradeParameters().healAmount</code>（默认30）夹到maxHp；90/100变100/100，不加上限。</li></ul>
+<p>老师提供的 <code>GetUpgradeParameters()</code> 返回本次使用的参数，只读其两个字段即可；主线不要硬编码30与0.8，否则06的实验值无法进入真实效果。其余两个效果及上下限规则不变。</p>
+<p>四效果逐个从 <a href="#experiment-state">公共合法初态</a> 重开验证。例如接 <code>player.hp=70; gameState=GameState::ChoosingUpgrade; upgradeChoices[0]=UpgradeKind::MaxHp; ApplyUpgrade(0);</code>，应90/120与Playing；在同一场景再调一次 <code>ApplyUpgrade(0)</code> 不应再加。替换选项/血量前重新建立初态，再预测对应效果。</p>
+<p>XP余量另开一次实验，不沿用刚才回血后的状态：从公共合法初态重开，设 <code>player.xp=235;</code>，再调用一次 <code>BeginUpgrade();</code> 触发第一面板，应level2、xp135、ChoosingUpgrade。只按一次数字：选择帧应用一次并回Playing，XP仍135、等级仍2，这一帧始终返回；下一帧由 <code>UpdateGame(dt)</code> 才再次检查条件、扣100、升至3级并弹第二面板，余35。不要在选择帧直接调 <code>BeginUpgrade()</code> 代替下一帧入口；第二次选择须再新按一次数字，不能一键连选。满级用另一份公共初态，先设level6、xp100，再触发，应不扣不升、不弹面板。<strong>停下来解释两种回血的区别与余量。</strong></p>
 <h3>第三小段 · 射速要能体验，旧弹不追溯</h3>
 <p id="todo-L4-05-C"><code>src/game.cpp → FireBullets() → TODO(L4-05-C)</code></p>
 <p id="todo-L4-05-D"><code>src/game.cpp → FireBullets() → TODO(L4-05-D)</code></p>
-<p>只看该函数两处：冷却&gt;0时不能新发射；成功找到空槽才把 <code>player.attack</code> 记到 <code>bullet.damage</code>，把 <code>shotCooldown</code> 设为当前间隔。池满不设冷却、不响。老师已在UpdateGame每帧减冷却夹0；按住箭头发射，方向优先Right&gt;Left&gt;Up&gt;Down，每次一颗、不斜射。</p>
+<p><code>player.shotInterval/shotCooldown</code> 都是float秒数，<code>bullet.damage/player.attack</code> 是int。只看该函数两处：冷却&gt;0时不能新发射；成功找到空槽才把 <code>player.attack</code> 记到 <code>bullet.damage</code>，把 <code>shotCooldown</code> 设为当前间隔。池满不设冷却、不响。老师已在UpdateGame每帧减冷却夹0；按住箭头发射，方向优先Right&gt;Left&gt;Up&gt;Down，每次一颗、不斜射。</p>
+<p><strong>把规则接到已有找槽代码：</strong>先看函数前面的TODO05-C，再看循环里的 <code>if (bullets[i].active) continue;</code> 和成功创建后的 <code>return;</code>。continue跳过活动槽；空槽才执行创建区，return保证本次只发一颗。冷却未归零的提前退出应写在05-C处、进入找槽之前。05-D在空槽创建区，把现有 <code>bullets[i].damage = INITIAL_ATTACK;</code> 的右侧替换成当前玩家攻击，不另造bullet变量；在同一成功区设置shotCooldown，再沿已有声音与return退出。若所有槽都活动，循环只continue并走到函数末尾，不能设置冷却。方向、找槽、声音调用都已给，不移动或重写它们。</p>
 <p>快照的理由先用纸上时间线解释：发出旧弹时攻击1，选择界面暂停，攻击升到2，恢复后旧弹命中；它携带的damage仍是1。若命中时再读取player.attack，就会把旧弹也变强。间隔表示「两次成功发射之间等多久」，数值越小才越快；射速提升不改变子弹飞行速度。</p>
-<p>先按住右键比较0.3与一次FireRate后的0.24秒；再试多次降到0.12不再降低。攻击实验：让一颗damage=1的旧弹存在，再升级attack到2，新弹damage=2，旧弹仍1。用05详细检查验证满池与快照，不必手打128颗。<strong>第三次停下来讲「出生时记下」和「随时读取」的区别，再跑完整01–05。</strong></p>
+<p>先按住右键比较0.3与一次FireRate后的0.24秒；再试多次降到0.12不再降低。攻击实验：让一颗damage=1的旧弹存在，再升级attack到2，新弹damage=2，旧弹仍1。用05-C/D局部检查验证满池与快照，不必手打128颗。<strong>第三次停下来讲「出生时记下」和「随时读取」的区别，再跑01–05的12个标记及独立整帧回归。</strong></p>
 </section>
 <section id="task-06"><h2>06 · 只改一个数，预测再实测</h2>
 <p id="todo-L4-06"><code>src/my_experiment.h → myExperiment → TODO(L4-06)</code></p>
-<p>先保留主线版本。挑一个成长数值，例如FireRate倍率或Heal量，只改变那一个数，不改多个效果、输入或tests。自己选合法初态、调用/操作和可观测结果，写下预测再运行；一次结果不同就缩小实验，不照结果倒填预测。</p>
-<p>例如你选择回血量，先自行给当前/最大HP，说明离上限还有多少，再算增加后的数；另一个初态可选接近上限。你要说明看见的变化来自改动的那个数，还是原本夹上限的规则。记录不一致也有价值：把其他输入保持不变，再查这次选择究竟是哪一种，别同时改血量上限和回血量。</p>
-<p><code>ExperimentNotes</code> 字段依次是 <code>recorded</code>（bool）、<code>change/prediction/observation/explanation</code>（<code>const char*</code> 文本）。在现有 <code>myExperiment</code> 花括号里填改动位置与前后值、初态及预测、实测、解释；有记录才设true。HUD只提示老师审核，不会自动判06通过。展示基线与实验的差异，实验后恢复主线数值并复测。</p>
+<p>先完成05-B并保留主线。第06项不直接改 <code>ApplyUpgrade</code> 的常量：只在 <code>myExperiment</code> 提交一个实验参数。评分器从同一初态分别调用真实升级函数，输出基线与实验；普通游戏仍用回血30、射速倍率0.8，测试后自动恢复。</p>
+<ol><li><strong>选变量、定初态。</strong><code>variable</code> 选 <code>ExperimentVariable::HealAmount</code> 或 <code>ExperimentVariable::FireRateMultiplier</code>，设 <code>submitted=true</code>。只改选中的 <code>healAmount</code>（int，1..100，与30不同）或 <code>fireRateMultiplier</code>（float，大于0且小于1，与0.8不同）；另一个保持默认。<code>normal</code> 和 <code>boundary</code> 是两个 <code>ExperimentScenario</code>，各填合法 <code>hp/maxHp/shotInterval</code>：1≤HP≤maxHp≤10000，间隔为有限的0.12..10秒。normal须让基线和实验都不夹值且结果不同；boundary须从未满血或大于0.12秒的间隔出发，让两次都触到回血上限或射速下限。只在这里换初态，不同时改成长规则。浮点绝对差小于0.0001按相等处理；倍率变化和normal结果差异应明显大于此容差，记录保留输出的小数。</li>
+<li><strong>先写预测，再测量。</strong>每个场景的 <code>predictedBaseline/predictedExperiment</code> 填一次升级后的预测：回血看HP，射速看间隔秒数。回血先相加再夹到maxHp；射速先乘倍率再取0.12下限。保留这次预测，即使它错了也不倒填。暂留 <code>recorded=false</code>，运行 <code>make test</code>，找 <code>[EXPERIMENT] normal</code> 与 <code>[EXPERIMENT] boundary</code> 的baseline/experiment实测；此时06因记录未完成仍红是正常的。若显示BLOCKED先补05-B；若初态/参数非法先改输入，不能把未运行当测量。</li>
+<li><strong>记录、分析，再核对。</strong>将实际数值填入 <code>observedBaseline/observedExperiment</code>，再设每个场景 <code>recorded=true</code>。<code>predictionMatched</code> 是bool，只有两次预测都符合实测才true；<code>actualChange</code> 填实验实测−基线实测；<code>baselineError/experimentError</code> 分别填实测−对应预测，保留正负号。<code>explanation</code> 自己解释规则或修正原因，不靠文字非空给分。再运行 <code>make test</code>：观察和分析必须吻合真实运行，预测错但正确修正仍可通过。</li></ol>
+<details><summary>填字段时再看：不用猜长花括号顺序</summary><p><code>ExperimentSpec</code> 保存变量和两个场景；<code>ExperimentScenario</code> 保存初态、预测、实测与分析。可以在原有初始化处用下面这个写法逐项赋值，仍只保留一份myExperiment，不改tests。示例只展示写法，不给完成实验答案：</p><pre tabindex="0" role="region" aria-label="实验逐字段赋值的写法"><code>inline ExperimentSpec myExperiment = [] {
+    ExperimentSpec e;
+    // 在这里逐项填写，例如 e.normal.hp = 你选择的合法血量;
+    // e.variable、实验参数、normal/boundary 的预测与记录由你填写。
+    return e;
+}();</code></pre><p>普通场景先算离上限/下限有多远，再选参数；边界场景只改初态去触边界。某个结果不同就对照预测误差，区分参数带来的变化与原来的夹值规则。测试会恢复参数，不需要把实验数值硬写回主线。清空myExperiment会回到未提交，不是撤销主线功能。</p></details>
 </section>
-<section id="homework"><h2>课后：补主线，再二选一</h2><p><strong>A · 成长数值实验：</strong>接06，保留只改一个数的版本，自己选第二个初态检查上限或边界。带预测、实测和解释，不追加新系统。</p><p><strong>B · 操作序列：</strong>设计两条序列，其中一条含「选择 → Enter → TAB → G」。逐步预测模式、状态、HP、XP、等级与计时，再运行核对。未完成主线先补；不用修改固定tests换绿。</p></section>
-<section id="checklist"><h2>总清单与排错</h2><p>勾选是本页人工记录，刷新不保留，不连接GitHub成绩。</p>
-<label class="check"><input id="check-01" type="checkbox">01 血条比例与边界正确</label>
-<label class="check"><input id="check-02" type="checkbox">02 同帧保护、闪烁与有效受伤声</label>
-<label class="check"><input id="check-03" type="checkbox">03 死亡优先、胜负冻结、全重置</label>
-<label class="check"><input id="check-04" type="checkbox">04 击败才奖经验、阈值余量与等级上限</label>
-<label class="check"><input id="check-05" type="checkbox">05 三小段演示、四效果、射速与旧弹</label>
-<label class="check"><input id="check-06" type="checkbox">06 单数值实验，老师听完解释</label>
-<pre tabindex="0" role="region" aria-label="排错记录模板">预期：初态、一次调用或操作、规则依据
-实际：HP / XP / level / survivalTime / 状态
-尝试：这次只改什么，结果怎样
-最小代码：哪一小段能复现
-推断：下一步只验证哪个猜测</pre>
-<p>编译过关不等于玩法过关；自动检查也不证明画面、声音已现场通过。保留完整课包和主线版本，按Git手册在自己的练习分支提交。保留问题与下次函数入口。</p></section>
+<section id="homework"><h2>课后：补主线，再二选一</h2><p><strong>A · 成长数值实验：</strong>接06，在两个场景通过后另选初态探索：预测夹值何时开始遮住参数变化，带基线/实验实测与解释，不追加新系统。</p><p><strong>B · 操作序列：</strong>设计两条序列，其中一条含「选择 → Enter → TAB → G」。逐步预测模式、状态、HP、XP、等级与计时，再运行核对。未完成主线先补；不用修改固定tests换绿。</p><p>保留完整课包与主线版本，按Git手册在自己的练习分支提交，记下未解问题与下次函数入口。自动检查不能代替现场画面和声音验收。</p></section>
 <footer>正文可离线阅读；主题仅保存在当前浏览器，不能保存仍可切换。页面不加载成绩或音频。</footer>
 </main></div>
 <script>

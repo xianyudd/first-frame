@@ -3,3 +3,7 @@
 .vscode/
 /tools/
 /vendor/
+
+# Python 字节码缓存（跑 tests/test_grader.py 时自动生成，不进 git）
+__pycache__/
+*.pyc

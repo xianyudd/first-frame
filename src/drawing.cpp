@@ -44,8 +44,8 @@ void DrawHUD() {
     else DrawText(TextFormat("XP: %d / %d", player.xp, ExperienceNeeded()), 16, 116, 18, DARKGRAY);
     DrawRectangle(0, SCREEN_H - 74, SCREEN_W, 74, Fade(RAYWHITE, 0.92f));
     DrawCase(myCase, SCREEN_H - 68);
-    DrawText(myExperiment.recorded ? "Task 06: experiment recorded; teacher review required" :
-        "Task 06: record your experiment in src/my_experiment.h (manual review)", 16, SCREEN_H - 44, 18, DARKGRAY);
+    DrawText(myExperiment.submitted ? "Task 06: submitted; run make test to verify (game uses defaults)" :
+        "Task 06: edit src/my_experiment.h; run make test to measure and verify", 16, SCREEN_H - 44, 18, DARKGRAY);
     if (!GameAudio::ready) DrawText("Audio unavailable: check device and assets/audio WAV files", 16, SCREEN_H - 22, 18, MAROON);
 }
 void DrawUpgradePanel() {

@@ -14,6 +14,12 @@ UpgradeKind upgradeChoices[3];
 bool practiceMode = true;
 bool debugMode = false;
 
+namespace { UpgradeParameters upgradeParameters = DEFAULT_UPGRADE_PARAMETERS; }
+const UpgradeParameters& GetUpgradeParameters() { return upgradeParameters; }
+ScopedUpgradeParameters::ScopedUpgradeParameters(UpgradeParameters parameters)
+    : previous(upgradeParameters) { upgradeParameters = parameters; }
+ScopedUpgradeParameters::~ScopedUpgradeParameters() { upgradeParameters = previous; }
+
 // 沿用第 2 课的怪物配置。
 EnemyConfig ConfigOf(EnemyKind kind) {
     switch (kind) {
@@ -255,6 +261,7 @@ void BeginUpgrade() {
 }
 void ApplyUpgrade(int index) {
     // TODO(L4-05-B): 只接受选择状态中的合法索引，应用一次效果，再回到 Playing。
+    // 回血量/射速倍率从 GetUpgradeParameters() 读取；普通游戏默认 30 / 0.8。
     (void)index;
 }
 const char* UpgradeName(UpgradeKind kind) {

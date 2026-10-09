@@ -11,8 +11,8 @@
   "duration_seconds": 0.18,
   "sha256": "760940366a0dd3d12b933fa0572f20ba24632207387cb60008efd0f907a39202",
   "license": "CC0-1.0, hurt.wav only; see hurt-LICENSE.txt",
+  "regeneration_command": "python3 teacher/generate_hurt.py",
   "reproducibility": "Standard-library Python, no random input. Floating-point libm differences may affect least significant PCM bits on another platform.",
   "runtime_requirement": "None; the game loads the shipped WAV.",
-  "listening_status": "Not listened to in this authoring session; synthesis and PCM validation are not real playback evidence.",
-  "generator_availability": "The generator is retained privately; the shipped WAV has no runtime generator dependency."
+  "listening_status": "Not listened to in this authoring session; synthesis and PCM validation are not real playback evidence."
 }

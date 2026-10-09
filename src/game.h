@@ -29,6 +29,23 @@ inline constexpr int MAX_LEVEL = 6, XP_PER_KILL = 10, XP_PER_LEVEL = 100;
 inline constexpr float SURVIVAL_SECONDS = 180.0f, INVUL_SECONDS = 0.8f;
 inline constexpr float SHOT_INTERVAL = 0.30f, MIN_SHOT_INTERVAL = 0.12f;
 
+// 普通游戏固定使用这些默认值；06 评分器仅在一个作用域内临时替换参数。
+struct UpgradeParameters {
+    int healAmount = 30;
+    float fireRateMultiplier = 0.8f;
+};
+inline constexpr UpgradeParameters DEFAULT_UPGRADE_PARAMETERS{};
+const UpgradeParameters& GetUpgradeParameters();
+class ScopedUpgradeParameters {
+public:
+    explicit ScopedUpgradeParameters(UpgradeParameters parameters);
+    ~ScopedUpgradeParameters();
+    ScopedUpgradeParameters(const ScopedUpgradeParameters&) = delete;
+    ScopedUpgradeParameters& operator=(const ScopedUpgradeParameters&) = delete;
+private:
+    UpgradeParameters previous;
+};
+
 // 唯一定义在所选的 game.cpp；学生与教师实现不能同时链接。
 extern Camera2D camera;
 extern int wall[WORLD_ROWS][WORLD_COLS];
