@@ -2,34 +2,66 @@
   "use strict";
   var REPO = "first-frame", KEY = "rogue-hb", CACHE = "rogue-todo-cache";
   var NAME = /^[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38}$/i;
-  var TASK_COUNTS = {1:4, 2:6, 3:9, 4:5}; // 仅自动组；L3 的 10、L4 的 06 人工验收。
+  var TASK_COUNTS = {1:4, 2:6, 3:9, 4:13}; // L3 的 10 仍是人工验收。
+  var L4_NAMES = ["01", "02-A", "02-B", "02-C", "03-A", "03-B", "04-A", "04-B", "05-A", "05-B", "05-C", "05-D", "06"];
+  var L4_CHAPTERS = [[1], [2,3,4], [5,6], [7,8], [9,10,11,12], [13]];
+  var L4_PREREQUISITES = {9:8, 13:10};
   function taskCount(lesson) { return TASK_COUNTS[lesson] || 0; }
+  function taskName(lesson, id) { return lesson === 4 ? L4_NAMES[id-1] : id; }
   var LABEL = {blocked:"前置任务未通过（未执行）", idle:"未连接", none:"尚未提交", waiting:"等待本次评测", run:"评测中", pass:"通过", partial:"部分通过", fail:"未通过", unknown:"暂无逐项结果", unavailable:"评测不可用", rate:"GitHub 查询限流", network:"读取失败", cached:"上次记录（未核实最新）"};
   var POLL = 90000, MAX_POLL = 4, STALE = 180000;
 
-  function parseStatuses(data, lesson) {
-    var result = {}, seen = {};
+  function countState(s, integration) {
+    var pattern = integration ? /^checks (\d{1,3})\/(\d{1,3})$/ : /^(?:checks|source check) (\d{1,3})\/(\d{1,3})$/;
+    var count = typeof s.description === "string" && s.description.match(pattern);
+    if (!count) return "unavailable";
+    var passed = Number(count[1]), total = Number(count[2]);
+    if (total < 1 || total > 100 || passed > total ||
+        (s.state !== "success" && s.state !== "failure") ||
+        (s.state === "success") !== (passed === total)) return "unavailable";
+    return passed === total ? "pass" : passed ? "partial" : "fail";
+  }
+  function unavailableItems(lesson) {
+    var items = {};
+    for (var id=1; id<=taskCount(lesson); id++) items[id] = "unavailable";
+    return items;
+  }
+  function parseStatuses(data, lesson, runUrl) {
+    var result = {}, seen = {}, blockers = {}, invalid = false;
     var statuses = data && Array.isArray(data.statuses) ? data.statuses : [];
+    var pattern = lesson === 4 ? /^course\/lesson-4\/v2\/todo-([1-9]\d*)$/ : /^course\/lesson-(\d+)\/todo-(\d+)$/;
     statuses.forEach(function (s) {
-      var m = typeof s.context === "string" && s.context.match(/^course\/lesson-(\d+)\/todo-(\d+)$/);
-      if (!m || Number(m[1]) !== lesson || Number(m[2]) < 1 || Number(m[2]) > taskCount(lesson)) return;
-      var id = Number(m[2]);
+      var m = s && typeof s.context === "string" && s.context.match(pattern);
+      if (!m || (lesson !== 4 && Number(m[1]) !== lesson)) {
+        if (lesson === 4 && s && typeof s.context === "string" && s.context.indexOf("course/lesson-4/v2/todo-") === 0) invalid = true;
+        return;
+      }
+      var id = Number(m[lesson === 4 ? 1 : 2]);
+      if (id < 1 || id > taskCount(lesson)) { if (lesson === 4) invalid = true; return; }
       if (seen[id]) return; // GitHub returns the newest status for each context first.
       seen[id] = true;
-      var blocker = typeof s.description === "string" && s.description.match(/^blocked by task ([1-9])$/);
-      if (lesson === 3 && s.state === "error" && blocker && Number(blocker[1]) !== id) {
-        result[id] = "blocked"; return;
+      if (lesson === 4 && runUrl && s.target_url !== runUrl) { invalid = true; return; }
+      var blocker = typeof s.description === "string" && s.description.match(/^blocked by task ([1-9]\d*)$/);
+      if (s.state === "error" && blocker && ((lesson === 3 && blocker[1].length === 1 && Number(blocker[1]) !== id) ||
+          (lesson === 4 && L4_PREREQUISITES[id] === Number(blocker[1])))) {
+        result[id] = "blocked"; blockers[id] = Number(blocker[1]); return;
       }
-      var count = typeof s.description === "string" && s.description.match(/^(?:checks|source check) (\d+)\/(\d+)$/);
-      if (s.state === "error" || !count) { result[id] = "unavailable"; return; }
-      var passed = Number(count[1]), total = Number(count[2]);
-      if (total < 1 || total > 100 || passed > total ||
-          (s.state !== "success" && s.state !== "failure") ||
-          (s.state === "success") !== (passed === total)) {
-        result[id] = "unavailable";
-      } else result[id] = passed === total ? "pass" : passed ? "partial" : "fail";
+      result[id] = countState(s, lesson === 4);
+      if (lesson === 4 && result[id] === "unavailable") invalid = true;
     });
+    if (lesson === 4) {
+      Object.keys(blockers).forEach(function(id){
+        if (["partial", "fail", "blocked"].indexOf(result[blockers[id]]) === -1) invalid = true;
+      });
+      if (invalid || Object.keys(result).length !== taskCount(lesson)) return unavailableItems(lesson);
+    }
     return result;
+  }
+  function parseIntegration(data, runUrl) {
+    var statuses = data && Array.isArray(data.statuses) ? data.statuses : [];
+    var s = statuses.find(function(s){return s && s.context === "course/lesson-4/v2/integration";});
+    if (!s) return "unknown";
+    return runUrl && s.target_url !== runUrl ? "unavailable" : countState(s, true);
   }
   function normalize(raw) { return String(raw || "").trim().replace(/^@+/, ""); }
   function read(key) { try { return JSON.parse(localStorage.getItem(key)) || {}; } catch (e) { return {}; } }
@@ -57,15 +89,28 @@
     var url = latest.html_url;
     if (latest.status !== "completed") return {state:"run", sha:sha, url:url};
     if (latest.conclusion !== "success" && latest.conclusion !== "failure") return {state:"unavailable", sha:sha, url:url};
+    if (lesson === 4 && !/^https:\/\/github\.com\/[^/]+\/[^/]+\/actions\/runs\/\d+$/.test(url || "")) {
+      return {state:"unavailable", sha:sha, items:unavailableItems(4), integration:"unavailable"};
+    }
     var data;
     try { data = await api(path + "/commits/" + sha + "/status?per_page=100"); }
-    catch (e) { if (e.message === "missing") return {state:"unknown", sha:sha, url:url}; throw e; }
-    var items = parseStatuses(data, lesson), total = taskCount(lesson);
+    catch (e) {
+      if (e.message === "missing") return lesson === 4 ?
+        {state:"unavailable", sha:sha, url:url, items:unavailableItems(4), integration:"unavailable"} : {state:"unknown", sha:sha, url:url};
+      throw e;
+    }
+    var items = parseStatuses(data, lesson, url), total = taskCount(lesson);
+    var integration = lesson === 4 ? parseIntegration(data, url) : null;
+    if (lesson === 4 && (integration === "unknown" || integration === "unavailable")) {
+      items = unavailableItems(lesson); integration = "unavailable";
+    }
     var complete = 0;
     for (var id=1; id<=total; id++) if (items[id] === "pass") complete++;
-    return {state:!Object.keys(items).length ? "unknown" :
+    var result = {state:!Object.keys(items).length ? "unknown" :
       Object.keys(items).length === total && Object.values(items).every(function(s){return s === "unavailable";}) ? "unavailable" :
-      complete === total ? "pass" : "partial", sha:sha, url:url, items:items};
+      complete === total && (lesson !== 4 || (integration === "pass" && latest.conclusion === "success")) ? "pass" : "partial", sha:sha, url:url, items:items};
+    if (lesson === 4) result.integration = result.state === "unavailable" ? "unavailable" : integration;
+    return result;
   }
   function itemState(result, id) {
     if (result.state === "cached") return "cached";
@@ -76,7 +121,7 @@
   function paintDot(el, state, lesson, id) {
     el.className = (el.classList.contains("dot") ? "dot " : "todo-dot ") + "todo-" + state;
     el.textContent = state === "pass" ? "✓" : state === "fail" ? "×" : state === "partial" ? "◐" : state === "run" || state === "waiting" ? "…" : "?";
-    var name = "第 " + lesson + " 课 TODO " + id + "：" + LABEL[state];
+    var name = "第 " + lesson + " 课 TODO " + taskName(lesson,id) + "：" + LABEL[state];
     if (lesson === 2 && (id === 1 || id === 5) && state === "pass") name += "（仅源码检查；请运行游戏确认画面）";
     el.title = name;
     el.setAttribute("aria-label", name);
@@ -87,26 +132,42 @@
       var state = itemState(result,id);
       if (state === "pass") done++;
       document.querySelectorAll('[data-todo="' + lesson + '-' + id + '"]').forEach(function(el){paintDot(el,state,lesson,id);});
-      var nav = document.querySelector('.nav a[data-lv="' + id + '"]');
+      var nav = lesson === 4 ? null : document.querySelector('.nav a[data-lv="' + id + '"]');
       if (nav) {
         var label = nav.textContent.trim();
         nav.setAttribute("aria-label", label + "，" + LABEL[state]);
       }
-      var info = document.querySelector('[data-todo-label="' + lesson + '-' + id + '"]');
-      if (info) info.textContent = LABEL[state] + (lesson === 2 && (id === 1 || id === 5) && state === "pass" ? " · 请运行游戏确认画面" : "");
+      document.querySelectorAll('[data-todo-label="' + lesson + '-' + id + '"]').forEach(function(info){
+        info.textContent = LABEL[state] + (lesson === 2 && (id === 1 || id === 5) && state === "pass" ? " · 请运行游戏确认画面" : "");
+      });
+    }
+    if (lesson === 4) {
+      if (document.body.getAttribute("data-lesson") === "4") L4_CHAPTERS.forEach(function(ids, chapter){
+        var nav = document.querySelector('.nav a[data-lv="' + (chapter+1) + '"]');
+        if (nav) nav.setAttribute("aria-label", nav.textContent.trim() + "，" + ids.map(function(id){
+          return "TODO " + taskName(4,id) + "：" + LABEL[itemState(result,id)];
+        }).join("；"));
+      });
+      var integration = result.state === "cached" ? "cached" : result.integration ||
+        (result.items ? "unavailable" : result.state);
+      document.querySelectorAll('[data-todo-integration="4"]').forEach(function(info){
+        info.textContent = "整帧回归：" + LABEL[integration];
+        info.setAttribute("aria-label", info.textContent);
+      });
     }
     var badge = document.getElementById("badge-" + lesson);
     if (badge) {
       badge.className = "badge " + (result.state === "pass" ? "pass" : result.state === "run" ? "run" : result.state === "partial" ? "fail" : "idle");
       badge.textContent = result.state === "pass" ? "✓ " + done + " / " + total + " 项通过" : result.state === "partial" ? done + " / " + total + " 项通过" : LABEL[result.state];
       if (lesson === 3) badge.textContent += " · 10 人工验收";
-      if (lesson === 4) badge.textContent += " · 06 人工验收";
+      if (lesson === 4 && result.integration) badge.textContent += " · 整帧" + LABEL[result.integration];
     }
     if (document.body.getAttribute("data-lesson") === String(lesson)) {
       var count = document.getElementById("pcount"), fill = document.getElementById("pfill"), bar = document.querySelector('[role="progressbar"]');
       if (count) count.textContent = done + " / " + total;
       if (fill) fill.style.transform = "scaleX(" + done / total + ")";
       if (bar) {
+        bar.setAttribute("aria-valuemax", String(total));
         bar.setAttribute("aria-valuenow", String(done));
         bar.setAttribute("aria-valuetext", "本次自动检查通过 " + done + " 项，共 " + total + " 项；" + LABEL[result.state]);
       }
@@ -117,16 +178,18 @@
         result.state === "unknown" ? "暂无逐项结果；已有旧工作流的复刻需要更新 grade.yml。" :
         "自动检查：" + LABEL[result.state] + "。" + (lesson === 2 ? "①⑤仅检查绘制源码，实际外观请运行 make run。" : "") ;
       if (note && lesson === 3) note.textContent += " 仅统计 01–09；BLOCKED 表示未执行，0/0 不是通过。10 请演示自己的案例并解释，画面与声音仍需实际运行检查。";
+      if (note && lesson === 4) note.textContent += " 13 个 TODO 独立计分；整帧回归：" + LABEL[integration] + "。整帧未通过时保留可信局部分数，但不算课程全通过；BLOCKED 表示未执行。画面、声音与解释质量仍需实际验收。";
     }
     return done;
   }
+  function cacheKey(user, lesson) { return user.toLowerCase() + "/" + lesson + (lesson === 4 ? "/L4-v2" : ""); }
   function cached(user, lesson) {
-    var c = read(CACHE), entry = c[user.toLowerCase() + "/" + lesson];
+    var c = read(CACHE), entry = c[cacheKey(user,lesson)];
     return entry && entry.result && Date.now() - entry.at < 86400000 ? entry : null;
   }
   function storeResult(user, lesson, result) {
     if (result.items && result.sha) {
-      var c=read(CACHE); c[user.toLowerCase() + "/" + lesson]={at:Date.now(),result:result}; write(CACHE,c);
+      var c=read(CACHE); c[cacheKey(user,lesson)]={at:Date.now(),result:result}; write(CACHE,c);
     }
   }
   function init() {
@@ -219,6 +282,6 @@
     if (NAME.test(initial)) activate(initial);
     else lessons.forEach(function(n){paintLesson(n,{state:"idle"});});
   }
-  if (typeof module !== "undefined" && module.exports) module.exports={parseStatuses:parseStatuses, itemState:itemState, lookup:lookup, init:init};
+  if (typeof module !== "undefined" && module.exports) module.exports={parseStatuses:parseStatuses, parseIntegration:parseIntegration, itemState:itemState, lookup:lookup, paintLesson:paintLesson, taskName:taskName, cached:cached, storeResult:storeResult, init:init};
   else if (root.document) init();
 })(typeof window !== "undefined" ? window : globalThis);

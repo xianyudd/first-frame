@@ -1,10 +1,12 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { parseStatuses, itemState, lookup, init } = require('../todo-progress.js');
+const fs = require('node:fs');
+const path = require('node:path');
+const { parseStatuses, parseIntegration, itemState, lookup, paintLesson, taskName, cached, storeResult, init } = require('../todo-progress.js');
 
 function status(n, passed, total, state, lesson = 2) {
-  return { context: `course/lesson-${lesson}/todo-${n}`,
-    description: `checks ${passed}/${total}`, state };
+  return { context: `course/lesson-${lesson}${lesson === 4 ? '/v2' : ''}/todo-${n}`,
+    description: `checks ${passed}/${total}`, state, target_url: runUrl };
 }
 function response(value, code = 200) {
   return { status: code, ok: code >= 200 && code < 300, json: async () => value };
@@ -20,6 +22,14 @@ function mock(branch, runs, statuses) {
   return requests;
 }
 const sha = 'a'.repeat(40);
+const runUrl = 'https://github.com/student/first-frame/actions/runs/123';
+function l4Report() { return Array.from({length:13},(_,i)=>status(i+1,12,12,'success',4)); }
+function integration(passed=3,total=3,state='success') {
+  return {context:'course/lesson-4/v2/integration',description:`checks ${passed}/${total}`,state,target_url:runUrl};
+}
+function completed(conclusion='success') {
+  return response({workflow_runs:[{head_sha:sha,status:'completed',conclusion,html_url:runUrl}]});
+}
 
 test('parse newest matching statuses and preserve partial, failed, and unknown items', () => {
   const found = parseStatuses({ statuses: [
@@ -121,30 +131,96 @@ test('lesson 3 cannot pass with only six statuses; nine passes still require man
   assert.equal((await lookup('student',3)).state,'pass');
 });
 
-test('lesson 4 exposes five automatic passes and ignores manual task six', async () => {
-  const list = [1,2,3,4,5,6].map(n=>status(n,1,1,'success',4));
-  assert.deepEqual(parseStatuses({statuses:list},4), {1:'pass',2:'pass',3:'pass',4:'pass',5:'pass'});
-  mock(response({commit:{sha}}),response({workflow_runs:[{head_sha:sha,status:'completed',conclusion:'success'}]}),response({statuses:list}));
-  assert.equal((await lookup('student',4)).state,'pass');
+test('lesson 4 requires thirteen v2 tasks and independent integration, including multi-digit IDs', async () => {
+  const list = l4Report().concat(integration());
+  const found = parseStatuses({statuses:list},4);
+  assert.equal(Object.keys(found).length,13);
+  for (let n=1;n<=13;n++) assert.equal(found[n],'pass');
+  mock(response({commit:{sha}}),completed(),response({statuses:list}));
+  const result = await lookup('student',4);
+  assert.equal(result.state,'pass');
+  assert.equal(result.integration,'pass');
 });
 
-test('lesson 4 unfinished or missing groups cannot become complete', async () => {
-  const run = response({workflow_runs:[{head_sha:sha,status:'completed',conclusion:'failure'}]});
-  const list = [1,2,3,4,5].map(n=>status(n,n===1 ? 1 : 0,2,'failure',4));
-  mock(response({commit:{sha}}),run,response({statuses:list}));
+test('old five-group greens never map to v2 tasks', async () => {
+  const list = Array.from({length:5},(_,i)=>({context:`course/lesson-4/todo-${i+1}`,description:'checks 1/1',state:'success'}));
+  assert.deepEqual(Object.values(parseStatuses({statuses:list},4)),Array(13).fill('unavailable'));
+  mock(response({commit:{sha}}),completed(),response({statuses:list}));
+  assert.equal((await lookup('student',4)).state,'unavailable');
+});
+
+test('integration failure preserves local scores but never course green', async () => {
+  const list = l4Report().concat(integration(1,3,'failure'));
+  mock(response({commit:{sha}}),completed('failure'),response({statuses:list}));
   const result = await lookup('student',4);
   assert.equal(result.state,'partial');
-  assert.equal(result.items[1],'partial');
-  assert.equal(result.items[5],'fail');
-  mock(response({commit:{sha}}),run,response({statuses:[1,2,3,4].map(n=>status(n,1,1,'success',4))}));
+  assert.equal(result.integration,'partial');
+  assert.deepEqual(Object.values(result.items),Array(13).fill('pass'));
+  // A failed latest run cannot be hidden by even all-green published statuses.
+  mock(response({commit:{sha}}),completed('failure'),response({statuses:l4Report().concat(integration())}));
   assert.equal((await lookup('student',4)).state,'partial');
 });
 
-test('lesson 4 unavailable and malformed counts are never passing', async () => {
-  const list = [1,2,3,4,5].map(n=>({context:`course/lesson-4/todo-${n}`,description:'grading unavailable',state:'error'}));
-  mock(response({commit:{sha}}),response({workflow_runs:[{head_sha:sha,status:'completed',conclusion:'failure'}]}),response({statuses:list}));
+test('missing or invalid integration invalidates the whole report', async () => {
+  const cases = [null,integration(0,0),integration(4,3),integration(1,101,'failure'),
+    {...integration(),state:'failure'}, {...integration(),description:'source check 3/3'},
+    {...integration(),target_url:'https://github.com/student/first-frame/actions/runs/122'}];
+  for (const entry of cases) {
+    const list = l4Report().concat(entry ? [entry] : []);
+    mock(response({commit:{sha}}),completed(),response({statuses:list}));
+    const result = await lookup('student',4);
+    assert.equal(result.state,'unavailable');
+    assert.equal(result.integration,'unavailable');
+    assert.deepEqual(Object.values(result.items),Array(13).fill('unavailable'));
+  }
+});
+
+test('lesson 4 malformed, unavailable or missing tasks invalidate every item', async () => {
+  const cases = [null,status(10,0,0,'success',4),status(10,2,1,'success',4),status(10,1,101,'failure',4),
+    {...status(10,1,1,'success',4),description:'grading unavailable',state:'error'},
+    {...status(10,1,1,'success',4),description:'checks -1/1'},
+    {...status(10,1,1,'success',4),description:'checks 1/1 trailing'},
+    {...status(10,1,1,'success',4),description:'source check 1/1'},
+    {...status(10,1,1,'success',4),target_url:'https://github.com/student/first-frame/actions/runs/122'}];
+  for (const entry of cases) {
+    const list = l4Report().filter(s=>!s.context.endsWith('todo-10')).concat(entry ? [entry] : []).concat(integration());
+    assert.deepEqual(Object.values(parseStatuses({statuses:list},4,runUrl)),Array(13).fill('unavailable'));
+    mock(response({commit:{sha}}),completed(),response({statuses:list}));
+    assert.equal((await lookup('student',4)).state,'unavailable');
+  }
+});
+
+test('lesson 4 blockers require declared dependencies with non-green predecessor', () => {
+  const list = l4Report();
+  list[7] = status(8,11,12,'failure',4);
+  list[8] = {...status(9,0,0,'error',4),description:'blocked by task 8'};
+  list[9] = status(10,0,12,'failure',4);
+  list[12] = {...status(13,0,0,'error',4),description:'blocked by task 10'};
+  const found = parseStatuses({statuses:list},4);
+  assert.equal(found[8],'partial');
+  assert.equal(found[9],'blocked');
+  assert.equal(found[10],'fail');
+  assert.equal(found[13],'blocked');
+  for (const change of [
+    {...list[8],description:'blocked by task 10'},
+    {...list[8],description:'blocked by task 08'},
+    {...list[8],state:'failure'}
+  ]) {
+    const bad = list.slice(); bad[8] = change;
+    assert.deepEqual(Object.values(parseStatuses({statuses:bad},4)),Array(13).fill('unavailable'));
+  }
+  const bad = list.slice(); bad[9] = status(10,12,12,'success',4);
+  assert.deepEqual(Object.values(parseStatuses({statuses:bad},4)),Array(13).fill('unavailable'));
+});
+
+test('newest v2 context wins and previous runs cannot certify latest run', async () => {
+  const list = l4Report().concat(integration());
+  list.unshift({...status(10,1,1,'success',4),target_url:'https://github.com/student/first-frame/actions/runs/122'});
+  mock(response({commit:{sha}}),completed(),response({statuses:list}));
   assert.equal((await lookup('student',4)).state,'unavailable');
-  assert.deepEqual(parseStatuses({statuses:[status(1,0,0,'success',4),status(2,2,1,'success',4),status(3,1,101,'failure',4)]},4),{1:'unavailable',2:'unavailable',3:'unavailable'});
+  const newest = l4Report(); newest[9]=status(10,1,12,'failure',4);
+  assert.equal(parseStatuses({statuses:newest.concat(l4Report())},4)[10],'partial');
+  assert.equal(parseIntegration({statuses:[integration(0,3,'failure'),integration()]}),'fail');
 });
 
 test('lesson 4 older SHA cannot certify the newest commit', async () => {
@@ -156,4 +232,139 @@ test('lesson 4 older SHA cannot certify the newest commit', async () => {
 test('GitHub rate limiting is distinct from a missing branch', async () => {
   mock(response({},403));
   await assert.rejects(lookup('student',1),/rate/);
+});
+
+test('L4 cache is version-isolated while old lesson cache remains compatible', () => {
+  const saved = new Map([['rogue-todo-cache',JSON.stringify({
+    'student/4':{at:Date.now(),result:{state:'pass',items:{1:'pass',2:'pass',3:'pass',4:'pass',5:'pass'},sha}},
+    'student/3':{at:Date.now(),result:{state:'pass',items:{1:'pass'},sha}}
+  })]]);
+  global.localStorage={getItem:key=>saved.get(key)||null,setItem:(key,value)=>saved.set(key,value)};
+  try {
+    assert.equal(cached('student',4),null);
+    assert.equal(cached('student',3).result.state,'pass');
+    const result={state:'pass',items:parseStatuses({statuses:l4Report()},4),integration:'pass',sha};
+    storeResult('Student',4,result);
+    assert.deepEqual(cached('student',4).result,result);
+    const data=JSON.parse(saved.get('rogue-todo-cache'));
+    assert.equal(data['student/4'].result.items[6],undefined);
+    assert.ok(data['student/4/L4-v2']);
+  } finally { delete global.localStorage; }
+});
+
+function element(text='') {
+  return {textContent:text,className:'',attributes:{},style:{},classList:{contains:()=>false},
+    setAttribute(name,value){this.attributes[name]=value;}};
+}
+function l4Dom() {
+  const dots=Array.from({length:13},()=>element('?'));
+  const labels=Array.from({length:13},()=>element());
+  const nav=Array.from({length:6},(_,i)=>element(`章节 ${i+1}`));
+  const elements={pcount:element(),pfill:element(),'badge-4':element(),'todo-feedback':element()};
+  const bar=element(), integrated=[element(),element()];
+  const selectors=[];
+  global.document={
+    body:{getAttribute:()=> '4'},
+    getElementById:id=>elements[id]||null,
+    querySelectorAll(selector){
+      let m=selector.match(/^\[data-todo="4-(\d+)"\]$/);
+      if(m) return [dots[Number(m[1])-1]];
+      m=selector.match(/^\[data-todo-label="4-(\d+)"\]$/);
+      if(m) return [labels[Number(m[1])-1]];
+      if(selector==='[data-todo-integration="4"]') return integrated;
+      return [];
+    },
+    querySelector(selector){
+      selectors.push(selector);
+      if(selector==='[role="progressbar"]') return bar;
+      const m=selector.match(/^\.nav a\[data-lv="(\d+)"\]$/);
+      return m ? nav[Number(m[1])-1]||null : null;
+    }
+  };
+  return {dots,labels,nav,elements,bar,integrated,selectors};
+}
+
+test('L4 DOM renders thirteen original TODO names and six explicit chapter mappings', () => {
+  const dom=l4Dom();
+  try {
+    const items=parseStatuses({statuses:l4Report()},4);
+    items[3]='fail'; items[8]='partial'; items[9]='blocked'; items[13]='fail';
+    assert.equal(paintLesson(4,{state:'partial',items,integration:'fail'}),9);
+    const names=['01','02-A','02-B','02-C','03-A','03-B','04-A','04-B','05-A','05-B','05-C','05-D','06'];
+    names.forEach((name,i)=>{
+      assert.equal(taskName(4,i+1),name);
+      assert.match(dom.dots[i].attributes['aria-label'],new RegExp(`TODO ${name}：`));
+    });
+    assert.match(dom.nav[1].attributes['aria-label'],/TODO 02-A：通过；TODO 02-B：未通过；TODO 02-C：通过/);
+    assert.match(dom.nav[3].attributes['aria-label'],/TODO 04-A：通过；TODO 04-B：部分通过/);
+    assert.match(dom.nav[4].attributes['aria-label'],/TODO 05-A：前置任务未通过/);
+    assert.match(dom.nav[5].attributes['aria-label'],/TODO 06：未通过/);
+    assert.ok(dom.selectors.every(s=>!s.includes('data-lv="7"')&&!s.includes('data-lv="13"')));
+    assert.equal(dom.elements.pcount.textContent,'9 / 13');
+    assert.equal(dom.bar.attributes['aria-valuemax'],'13');
+    assert.equal(dom.bar.attributes['aria-valuenow'],'9');
+    assert.equal(dom.labels[12].textContent,'未通过');
+    assert.deepEqual(dom.integrated.map(e=>e.textContent),['整帧回归：未通过','整帧回归：未通过']);
+    assert.doesNotMatch(dom.elements['badge-4'].textContent,/人工验收/);
+  } finally { delete global.document; }
+});
+
+test('integration failure with thirteen local passes renders no green badge', () => {
+  const dom=l4Dom();
+  try {
+    paintLesson(4,{state:'partial',items:parseStatuses({statuses:l4Report()},4),integration:'fail'});
+    assert.equal(dom.elements.pcount.textContent,'13 / 13');
+    assert.equal(dom.elements['badge-4'].className,'badge fail');
+    assert.match(dom.elements['badge-4'].textContent,/整帧未通过/);
+    assert.match(dom.elements['todo-feedback'].textContent,/不算课程全通过/);
+    paintLesson(4,{state:'cached',previous:{state:'pass',integration:'pass'}});
+    assert.deepEqual(dom.dots.map(e=>e.textContent),Array(13).fill('?'));
+    assert.match(dom.integrated[0].textContent,/上次记录/);
+  } finally { delete global.document; }
+});
+
+test('completed L4 run needs a verifiable run URL and missing status response is unavailable', async () => {
+  mock(response({commit:{sha}}),response({workflow_runs:[{head_sha:sha,status:'completed',conclusion:'success'}]}));
+  const noUrl=await lookup('student',4);
+  assert.equal(noUrl.state,'unavailable');
+  assert.equal(noUrl.integration,'unavailable');
+  mock(response({commit:{sha}}),completed(),response({},404));
+  const missing=await lookup('student',4);
+  assert.equal(missing.state,'unavailable');
+  assert.deepEqual(Object.values(missing.items),Array(13).fill('unavailable'));
+});
+
+test('actual HTML exposes thirteen dots and integration hooks without confusing chapter IDs', () => {
+  for(const file of ['index.html','lesson-4/index.html']) {
+    const html=fs.readFileSync(path.join(__dirname,'..',file),'utf8');
+    const ids=[...html.matchAll(/\bdata-todo="4-(\d+)"/g)].map(m=>Number(m[1]));
+    assert.deepEqual(ids.sort((a,b)=>a-b),Array.from({length:13},(_,i)=>i+1),file);
+    assert.match(html,/data-todo-integration="4"/);
+    assert.match(html,/id="badge-4"/);
+    if(file.startsWith('lesson-4')) {
+      assert.match(html,/<body[^>]*data-lesson="4"/);
+      const chapters=[...html.matchAll(/<a\b[^>]*data-lv="(\d+)"/g)].map(m=>Number(m[1]));
+      assert.deepEqual(chapters,[1,2,3,4,5,6]);
+      assert.deepEqual([...html.matchAll(/data-todo-label="4-(\d+)"/g)].map(m=>Number(m[1])).sort((a,b)=>a-b),Array.from({length:13},(_,i)=>i+1));
+      assert.match(html,/aria-valuemax="13"/);
+      for(const id of ['pcount','pfill','todo-feedback']) assert.ok(html.includes(`id="${id}"`),id);
+    }
+  }
+});
+
+test('old L1-L3 DOM count and visual/manual notes are retained', () => {
+  for(const lesson of [1,2,3]) {
+    const total={1:4,2:6,3:9}[lesson];
+    const badge=element(),count=element(),note=element(),bar=element(),dot=element();
+    global.document={body:{getAttribute:()=>String(lesson)},getElementById:id=>id===`badge-${lesson}`?badge:id==='pcount'?count:id==='todo-feedback'?note:null,
+      querySelectorAll:s=>s===`[data-todo="${lesson}-1"]`?[dot]:[],querySelector:s=>s==='[role="progressbar"]'?bar:null};
+    try {
+      const items={}; for(let n=1;n<=total;n++)items[n]='pass';
+      assert.equal(paintLesson(lesson,{state:'pass',items}),total);
+      assert.equal(count.textContent,`${total} / ${total}`);
+      assert.equal(badge.className,'badge pass');
+      if(lesson===2) assert.match(dot.title,/仅源码检查/);
+      if(lesson===3) assert.match(badge.textContent,/10 人工验收/);
+    } finally {delete global.document;}
+  }
 });
